@@ -7,16 +7,99 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 #include "myTeapot.h"
 #include "snake.h"
 #include "shaderprogram.h"
 #include "camera.h"
 
+using namespace std;
+
+void toar(float * ar, vector<glm::vec4> ver) {
+    glm::vec4* v = &ver[0];
+    int count = 0;
+    for (int i = 0; i < ver.size(); i++) {
+        ar[count++] = v->x;
+        ar[count++] = v->y;
+        ar[count++] = v->z;
+        ar[count++] = 1.0;
+    }
+}
+
 const float PI = 3.141592653589793f;
+
+void load_obj(const char* filename, vector<glm::vec4>& vertices, vector<glm::vec3>& normals, vector<GLushort>& elements)
+{
+    int lub = 0;
+    ifstream in(filename, ios::in);
+    if (!in)
+    {
+        cerr << "Cannot open " << filename << endl; exit(1);
+    }
+
+    string line;
+    while (getline(in, line))
+    {
+        cout << line << " to |" << line.substr(0, 2) << "|";
+        if (line.substr(0, 2) == "v ")
+        {
+            cout << lub++ << endl;
+            istringstream s(line.substr(2));
+            glm::vec4 v; s >> v.x; s >> v.y; s >> v.z; v.w = 1.0f;
+            vertices.push_back(v);
+        }
+        else if (line.substr(0, 2) == "f ")
+        {
+            istringstream s(line.substr(2));
+            GLushort a, b, c;
+            s >> a; s >> b; s >> c;
+            a--; b--; c--;
+            elements.push_back(a); elements.push_back(b); elements.push_back(c);
+        }
+        else if (line[0] == '#')
+        {
+            /* ignoring this line */
+        }
+        else
+        {
+            /* ignoring this line */
+        }
+
+        normals.resize(vertices.size(), glm::vec3(0.0, 0.0, 0.0));
+        for (int i = 0; i < elements.size(); i += 3)
+        {
+            GLushort ia = elements[i];
+            GLushort ib = elements[i + 1];
+            GLushort ic = elements[i + 2];
+            glm::vec3 normal = glm::normalize(glm::cross(
+                glm::vec3(vertices[ib]) - glm::vec3(vertices[ia]),
+                glm::vec3(vertices[ic]) - glm::vec3(vertices[ia])));
+            normals[ia] = normals[ib] = normals[ic] = normal;
+        }
+    }
+
+    normals.resize(vertices.size(), glm::vec3(0.0, 0.0, 0.0));
+    for (int i = 0; i < elements.size(); i += 3)
+    {
+        GLushort ia = elements[i];
+        GLushort ib = elements[i + 1];
+        GLushort ic = elements[i + 2];
+        glm::vec3 normal = glm::normalize(glm::cross(
+            glm::vec3(vertices[ib]) - glm::vec3(vertices[ia]),
+            glm::vec3(vertices[ic]) - glm::vec3(vertices[ia])));
+        normals[ia] = normals[ib] = normals[ic] = normal;
+    }
+}
 
 float speed_x = 0;
 float speed_y = 0;
 float aspectRatio = 1;
+
+vector<glm::vec4> suzanne_vertices;
+vector<glm::vec3> suzanne_normals;
+vector<GLushort> suzanne_elements;
 
 Camera* kamera;
 ShaderProgram* sp;
@@ -24,7 +107,7 @@ glm::vec3 kierunek = glm::vec3(0, 0, 1);
 
 glm::vec3 cubePos(0, 0, 0);
 
-float* vertices = Svertices;
+float* vertices;
 //float* normals = myTeapotVertexNormals;
 //float* texCoords = myTeapotTexCoords;
 //float* colors = myTeapotColors;
@@ -62,9 +145,10 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
 
-
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
-
+    load_obj("calc.obj", suzanne_vertices, suzanne_normals, suzanne_elements);
+    toar(vertices, suzanne_vertices);
+    cout << vertices[0];
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -116,9 +200,9 @@ void drawScene(GLFWwindow* window, glm::vec4 kier) {
 
 }
 
-int* normcalc(int a, int b, int c) {
-        
-}
+//int* normcalc(int a, int b, int c) {
+//        
+//}
 
 int main()
 {
