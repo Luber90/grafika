@@ -30,76 +30,91 @@ void toar(float * ar, vector<glm::vec4> ver) {
 
 const float PI = 3.141592653589793f;
 
-void load_obj(const char* filename, vector<glm::vec4>& vertices, vector<glm::vec3>& normals, vector<GLushort>& elements)
+bool loadOBJ(const char* path, std::vector < glm::vec4 >& out_vertices, std::vector < glm::vec2 >& out_uvs, std::vector < glm::vec4 >& out_normals)
 {
-    int lub = 0;
-    ifstream in(filename, ios::in);
-    if (!in)
-    {
-        cerr << "Cannot open " << filename << endl; exit(1);
+    std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
+    std::vector< glm::vec4 > temp_vertices;
+    std::vector< glm::vec2 > temp_uvs;
+    std::vector< glm::vec4 > temp_normals;
+
+    out_vertices.clear();
+    out_uvs.clear();
+    out_normals.clear();
+
+#pragma warning (disable : 4996)
+    FILE* file = fopen(path, "r");
+    if (file == NULL) {
+        printf("Impossible to open the file !\n");
+        return false;
+    }
+    while (1) {
+        char lineHeader[128];
+        //pierwsze slowo linii
+        int res = fscanf(file, "%s", lineHeader);
+        if (res == EOF)
+            break;
+        if (strcmp(lineHeader, "v") == 0) {
+            glm::vec4 vertex;
+            fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+            vertex.a = 1.0f;
+            temp_vertices.push_back(vertex);
+        }
+        else if (strcmp(lineHeader, "vt") == 0) {
+            glm::vec2 uv;
+            fscanf(file, "%f %f\n", &uv.x, &uv.y);
+            temp_uvs.push_back(uv);
+        }
+        else if (strcmp(lineHeader, "vn") == 0) {
+            glm::vec4 normal;
+            fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
+            normal.a = 0.0f;
+            temp_normals.push_back(normal);
+        }
+        else if (strcmp(lineHeader, "f") == 0) {
+            std::string vertex1, vertex2, vertex3;
+            unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+            int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+            if (matches != 9) {
+                printf("File can't be read by our simple parser : ( Try exporting with other options\n");
+                return false;
+            }
+            vertexIndices.push_back(vertexIndex[0]);
+            vertexIndices.push_back(vertexIndex[1]);
+            vertexIndices.push_back(vertexIndex[2]);
+            uvIndices.push_back(uvIndex[0]);
+            uvIndices.push_back(uvIndex[1]);
+            uvIndices.push_back(uvIndex[2]);
+            normalIndices.push_back(normalIndex[0]);
+            normalIndices.push_back(normalIndex[1]);
+            normalIndices.push_back(normalIndex[2]);
+        }
     }
 
-    string line;
-    while (getline(in, line))
-    {
-        cout << line << " to |" << line.substr(0, 2) << "|";
-        if (line.substr(0, 2) == "v ")
-        {
-            cout << lub++ << endl;
-            istringstream s(line.substr(2));
-            glm::vec4 v; s >> v.x; s >> v.y; s >> v.z; v.w = 1.0f;
-            vertices.push_back(v);
-        }
-        else if (line.substr(0, 2) == "f ")
-        {
-            istringstream s(line.substr(2));
-            GLushort a, b, c;
-            s >> a; s >> b; s >> c;
-            a--; b--; c--;
-            elements.push_back(a); elements.push_back(b); elements.push_back(c);
-        }
-        else if (line[0] == '#')
-        {
-            /* ignoring this line */
-        }
-        else
-        {
-            /* ignoring this line */
-        }
+    for (unsigned int i = 0; i < vertexIndices.size(); i++) {
+        unsigned int vertexIndex = vertexIndices[i];
+        glm::vec4 vertex = temp_vertices[vertexIndex - 1];
+        out_vertices.push_back(vertex);
 
-        normals.resize(vertices.size(), glm::vec3(0.0, 0.0, 0.0));
-        for (int i = 0; i < elements.size(); i += 3)
-        {
-            GLushort ia = elements[i];
-            GLushort ib = elements[i + 1];
-            GLushort ic = elements[i + 2];
-            glm::vec3 normal = glm::normalize(glm::cross(
-                glm::vec3(vertices[ib]) - glm::vec3(vertices[ia]),
-                glm::vec3(vertices[ic]) - glm::vec3(vertices[ia])));
-            normals[ia] = normals[ib] = normals[ic] = normal;
-        }
-    }
+        unsigned int uvsIndex = uvIndices[i];
+        glm::vec2 uvs = temp_uvs[uvsIndex - 1];
+        out_uvs.push_back(uvs);
 
-    normals.resize(vertices.size(), glm::vec3(0.0, 0.0, 0.0));
-    for (int i = 0; i < elements.size(); i += 3)
-    {
-        GLushort ia = elements[i];
-        GLushort ib = elements[i + 1];
-        GLushort ic = elements[i + 2];
-        glm::vec3 normal = glm::normalize(glm::cross(
-            glm::vec3(vertices[ib]) - glm::vec3(vertices[ia]),
-            glm::vec3(vertices[ic]) - glm::vec3(vertices[ia])));
-        normals[ia] = normals[ib] = normals[ic] = normal;
+        unsigned int normalIndex = normalIndices[i];
+        glm::vec4 normal = temp_normals[normalIndex - 1];
+        out_normals.push_back(normal);
     }
+    return true;
 }
+
 
 float speed_x = 0;
 float speed_y = 0;
+float speed_z = 0;
 float aspectRatio = 1;
 
 vector<glm::vec4> suzanne_vertices;
-vector<glm::vec3> suzanne_normals;
-vector<GLushort> suzanne_elements;
+vector<glm::vec4> suzanne_normals;
+vector<glm::vec2> suzanne_uvs;
 
 Camera* kamera;
 ShaderProgram* sp;
@@ -119,12 +134,16 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         if (key == GLFW_KEY_RIGHT) speed_x = -PI / 2;
         if (key == GLFW_KEY_UP) speed_y = PI / 2;
         if (key == GLFW_KEY_DOWN) speed_y = -PI / 2;
+        if (key == GLFW_KEY_SPACE) speed_z = PI / 2;
+        if (key == GLFW_KEY_LEFT_SHIFT) speed_z = -PI / 2;
     }
     if (action == GLFW_RELEASE) {
         if (key == GLFW_KEY_LEFT) speed_x = 0;
         if (key == GLFW_KEY_RIGHT) speed_x = 0;
         if (key == GLFW_KEY_UP) speed_y = 0;
         if (key == GLFW_KEY_DOWN) speed_y = 0;
+        if (key == GLFW_KEY_SPACE) speed_z = 0;
+        if (key == GLFW_KEY_LEFT_SHIFT) speed_z = 0;
     }
 }
 
@@ -146,9 +165,10 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glfwSetKeyCallback(window, keyCallback);
 
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
-    load_obj("calc.obj", suzanne_vertices, suzanne_normals, suzanne_elements);
-    toar(vertices, suzanne_vertices);
-    cout << vertices[0];
+    loadOBJ("lego.obj", suzanne_vertices, suzanne_uvs, suzanne_normals);
+    cout << "lol";
+    //toar(vertices, suzanne_vertices);
+    //cout << vertices[0];
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -164,6 +184,7 @@ void freeOpenGLProgram(GLFWwindow* window) {
 void drawScene(GLFWwindow* window, glm::vec4 kier) {
     //************Tutaj umieszczaj kod rysujący obraz******************l
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
 
     glm::mat4 V = glm::lookAt(
     kamera->getPos(),
@@ -185,12 +206,12 @@ void drawScene(GLFWwindow* window, glm::vec4 kier) {
     glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
     glEnableVertexAttribArray(sp->a("vertex"));  //Włącz przesyłanie danych do atrybutu vertex
-    glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, vertices); //Wskaż tablicę z danymi dla atrybutu vertex
+    glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &suzanne_vertices[0]); //Wskaż tablicę z danymi dla atrybutu vertex
 
     //glEnableVertexAttribArray(sp->a("normal"));  //Włącz przesyłanie danych do atrybutu normal
     //glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, normals); //Wskaż tablicę z danymi dla atrybutu normal
 
-    glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, vertexCount, 100); //Narysuj obiekt
+    glDrawArrays(GL_TRIANGLE_FAN, 0, suzanne_vertices.size()); //Narysuj obiekt
 
     glDisableVertexAttribArray(sp->a("vertex"));  //Wyłącz przesyłanie danych do atrybutu vertex
     //glDisableVertexAttribArray(sp->a("color"));  //Wyłącz przesyłanie danych do atrybutu color
@@ -244,7 +265,7 @@ int main()
         Mm = glm::rotate(Mm, kamera->getAng(), glm::vec3(0.0f, 1.0f, 0.0f));
         glm::vec4 cos = glm::normalize(Mm * glm::vec4(kierunek, 0));
         //kamera->setPos(kamera->getPos() + glm::vec3(speed_x * glfwGetTime(), 0, 0)); //Zwiększ/zmniejsz kąt obrotu na podstawie prędkości i czasu jaki upłynał od poprzedniej klatki
-        kamera->setPos(kamera->getPos() + glm::vec3(speed_y * glfwGetTime()*cos.x, speed_y * glfwGetTime()* cos.y, speed_y * glfwGetTime()* cos.z));
+        kamera->setPos(kamera->getPos() + glm::vec3(speed_y * glfwGetTime()*cos.x, speed_y * glfwGetTime()* cos.y + speed_z * glfwGetTime(), speed_y * glfwGetTime()* cos.z));
         glfwSetTime(0); //Zeruj timer
         drawScene(window, cos); //Wykonaj procedurę rysującą
         glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
