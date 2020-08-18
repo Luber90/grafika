@@ -1,5 +1,8 @@
 ﻿  ROBAL.cpp
 F:\grafika\ROBAL\ROBAL\snake.h(1852,1): warning C4305: "inicjowanie": obcięcie z "double" do "float"
-F:\grafika\ROBAL\ROBAL\ROBAL.cpp(23,23): warning C4018: "<": niezgodność typu ze znakiem/bez znaku
-F:\grafika\ROBAL\ROBAL\ROBAL.cpp(261,41): warning C4244: "argument": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(140,19): warning C4244: "inicjowanie": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(141,19): warning C4244: "inicjowanie": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(271,36): warning C4244: "argument": konwersja z "double" do "float", możliwa utrata danych
+  camera.cpp
+  Generowanie kodu...
   ROBAL.vcxproj -> F:\grafika\ROBAL\Debug\ROBAL.exe

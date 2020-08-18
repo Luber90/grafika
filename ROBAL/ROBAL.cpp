@@ -17,16 +17,7 @@
 
 using namespace std;
 
-void toar(float * ar, vector<glm::vec4> ver) {
-    glm::vec4* v = &ver[0];
-    int count = 0;
-    for (int i = 0; i < ver.size(); i++) {
-        ar[count++] = v->x;
-        ar[count++] = v->y;
-        ar[count++] = v->z;
-        ar[count++] = 1.0;
-    }
-}
+Camera* kamera = new Camera(glm::vec3(0, 0, -2.5));
 
 const float PI = 3.141592653589793f;
 
@@ -106,7 +97,7 @@ bool loadOBJ(const char* path, std::vector < glm::vec4 >& out_vertices, std::vec
     return true;
 }
 
-
+double lastx = 400, lasty = 300;
 float speed_x = 0;
 float speed_y = 0;
 float speed_z = 0;
@@ -116,35 +107,46 @@ vector<glm::vec4> suzanne_vertices;
 vector<glm::vec4> suzanne_normals;
 vector<glm::vec2> suzanne_uvs;
 
-Camera* kamera;
 ShaderProgram* sp;
-glm::vec3 kierunek = glm::vec3(0, 0, 1);
 
-glm::vec3 cubePos(0, 0, 0);
+glm::vec3 cubePos(0, 0, 3);
 
-float* vertices;
-//float* normals = myTeapotVertexNormals;
-//float* texCoords = myTeapotTexCoords;
-//float* colors = myTeapotColors;
-int vertexCount = Snumber;
+float* vertices = myTeapotVertices;
+float* normals = myTeapotVertexNormals;
+float* texCoords = myTeapotTexCoords;
+float* colors = myTeapotColors;
+int vertexCount = myTeapotVertexCount;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
-        if (key == GLFW_KEY_LEFT) speed_x = PI / 2;
-        if (key == GLFW_KEY_RIGHT) speed_x = -PI / 2;
-        if (key == GLFW_KEY_UP) speed_y = PI / 2;
-        if (key == GLFW_KEY_DOWN) speed_y = -PI / 2;
+        if (key == GLFW_KEY_A) speed_x = PI / 2;
+        if (key == GLFW_KEY_D) speed_x = -PI / 2;
+        if (key == GLFW_KEY_W) speed_y = PI / 2;
+        if (key == GLFW_KEY_S) speed_y = -PI / 2;
         if (key == GLFW_KEY_SPACE) speed_z = PI / 2;
         if (key == GLFW_KEY_LEFT_SHIFT) speed_z = -PI / 2;
     }
     if (action == GLFW_RELEASE) {
-        if (key == GLFW_KEY_LEFT) speed_x = 0;
-        if (key == GLFW_KEY_RIGHT) speed_x = 0;
-        if (key == GLFW_KEY_UP) speed_y = 0;
-        if (key == GLFW_KEY_DOWN) speed_y = 0;
+        if (key == GLFW_KEY_A) speed_x = 0;
+        if (key == GLFW_KEY_D) speed_x = 0;
+        if (key == GLFW_KEY_W) speed_y = 0;
+        if (key == GLFW_KEY_S) speed_y = 0;
         if (key == GLFW_KEY_SPACE) speed_z = 0;
         if (key == GLFW_KEY_LEFT_SHIFT) speed_z = 0;
     }
+}
+
+void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    float xoffset = lastx - xpos;
+    float yoffset = lasty - ypos;
+    lastx = xpos;
+    lasty = ypos;
+
+    const float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    kamera->rotateKier(glm::radians(xoffset), glm::radians(yoffset));
 }
 
 void error_callback(int error, const char* description) {
@@ -163,6 +165,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glEnable(GL_DEPTH_TEST);
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
+    glfwSetCursorPosCallback(window, mouseCallback);
 
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
     loadOBJ("lego.obj", suzanne_vertices, suzanne_uvs, suzanne_normals);
@@ -194,7 +197,7 @@ void drawScene(GLFWwindow* window, glm::vec4 kier) {
     glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatio, 0.01f, 50.0f); //Wylicz macierz rzutowania
 
     glm::mat4 M = glm::mat4(1.0f);
-    //M = glm::translate(M, cubePos);
+    M = glm::translate(M, cubePos);
     //M = glm::rotate(M, angle_y, glm::vec3(1.0f, 0.0f, 0.0f)); //Wylicz macierz modelu
     //M = glm::rotate(M, angle_x, glm::vec3(0.0f, 1.0f, 0.0f)); //Wylicz macierz modelu
 
@@ -206,16 +209,21 @@ void drawScene(GLFWwindow* window, glm::vec4 kier) {
     glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
     glEnableVertexAttribArray(sp->a("vertex"));  //Włącz przesyłanie danych do atrybutu vertex
-    glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &suzanne_vertices[0]); //Wskaż tablicę z danymi dla atrybutu vertex
+    glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, vertices); //Wskaż tablicę z danymi dla atrybutu vertex
+    glEnableVertexAttribArray(sp->a("normal"));
+    glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, normals);
+    glEnableVertexAttribArray(sp->a("color"));
+    glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, colors);
+
 
     //glEnableVertexAttribArray(sp->a("normal"));  //Włącz przesyłanie danych do atrybutu normal
     //glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, normals); //Wskaż tablicę z danymi dla atrybutu normal
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, suzanne_vertices.size()); //Narysuj obiekt
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount); //Narysuj obiekt
 
     glDisableVertexAttribArray(sp->a("vertex"));  //Wyłącz przesyłanie danych do atrybutu vertex
-    //glDisableVertexAttribArray(sp->a("color"));  //Wyłącz przesyłanie danych do atrybutu color
-    //glDisableVertexAttribArray(sp->a("normal"));  //Wyłącz przesyłanie danych do atrybutu normal
+    glDisableVertexAttribArray(sp->a("color"));  //Wyłącz przesyłanie danych do atrybutu color
+    glDisableVertexAttribArray(sp->a("normal"));  //Wyłącz przesyłanie danych do atrybutu normal
 
     glfwSwapBuffers(window); //Przerzuć tylny bufor na przedni
 
@@ -227,7 +235,6 @@ void drawScene(GLFWwindow* window, glm::vec4 kier) {
 
 int main()
 {
-    kamera = new Camera(glm::vec3(0, 0, -2.5), 0);
     GLFWwindow* window; //Wskaźnik na obiekt reprezentujący okno
 
     glfwSetErrorCallback(error_callback);//Zarejestruj procedurę obsługi błędów
@@ -237,7 +244,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    window = glfwCreateWindow(500, 500, "OpenGL", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL.
+    window = glfwCreateWindow(1920, 1080, "OpenGL", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL.
 
     if (!window) //Jeżeli okna nie udało się utworzyć, to zamknij program
     {
@@ -260,10 +267,9 @@ int main()
     glfwSetTime(0); //Zeruj timer
     while (!glfwWindowShouldClose(window)) //Tak długo jak okno nie powinno zostać zamknięte
     {
-        kamera->setAng(kamera->getAng() + speed_x * glfwGetTime());
-        glm::mat4 Mm = glm::mat4(1.0f);
-        Mm = glm::rotate(Mm, kamera->getAng(), glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::vec4 cos = glm::normalize(Mm * glm::vec4(kierunek, 0));
+        //kamera->setAngx(kamera->getAngx() + speed_x * glfwGetTime());
+        kamera->rotateKier(speed_x * glfwGetTime(), 0);
+        glm::vec4 cos = glm::vec4(kamera->getKier(), 0);
         //kamera->setPos(kamera->getPos() + glm::vec3(speed_x * glfwGetTime(), 0, 0)); //Zwiększ/zmniejsz kąt obrotu na podstawie prędkości i czasu jaki upłynał od poprzedniej klatki
         kamera->setPos(kamera->getPos() + glm::vec3(speed_y * glfwGetTime()*cos.x, speed_y * glfwGetTime()* cos.y + speed_z * glfwGetTime(), speed_y * glfwGetTime()* cos.z));
         glfwSetTime(0); //Zeruj timer
