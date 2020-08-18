@@ -152,12 +152,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="ROBAL.cpp" />
     <ClCompile Include="shaderprogram.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="myTeapot.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="snake.h" />
     <ClInclude Include="shaderprogram.h" />
   </ItemGroup>

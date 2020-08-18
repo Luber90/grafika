@@ -14,10 +14,11 @@
 #include "snake.h"
 #include "shaderprogram.h"
 #include "camera.h"
+#include "Model.h"
 
 using namespace std;
 
-Camera* kamera = new Camera(glm::vec3(0, 0, -2.5));
+Camera* kamera = new Camera(glm::vec3(0, 0, 0));
 
 const float PI = 3.141592653589793f;
 
@@ -97,16 +98,22 @@ bool loadOBJ(const char* path, std::vector < glm::vec4 >& out_vertices, std::vec
     return true;
 }
 
-double lastx = 400, lasty = 300;
+double lastx = 1337, lasty = 1337;
 float speed_x = 0;
 float speed_y = 0;
 float speed_z = 0;
+float speed_m = 0;
 float aspectRatio = 1;
 
-vector<glm::vec4> suzanne_vertices;
-vector<glm::vec4> suzanne_normals;
-vector<glm::vec2> suzanne_uvs;
-
+Model* podloga;
+float podloga_color[] = { 1.0, 1.0, 1.0, 1.0,
+                        1.0, 1.0, 1.0, 1.0,
+                        1.0, 1.0, 1.0, 1.0,
+                        1.0, 1.0, 1.0, 1.0,
+                        1.0, 1.0, 1.0, 1.0,
+                        1.0, 1.0, 1.0, 1.0,
+                        1.0, 1.0, 1.0, 1.0,
+                        1.0, 1.0, 1.0, 1.0 };
 ShaderProgram* sp;
 
 glm::vec3 cubePos(0, 0, 3);
@@ -125,6 +132,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         if (key == GLFW_KEY_S) speed_y = -PI / 2;
         if (key == GLFW_KEY_SPACE) speed_z = PI / 2;
         if (key == GLFW_KEY_LEFT_SHIFT) speed_z = -PI / 2;
+        if (key == GLFW_KEY_Q) speed_m = PI / 2;
+        if (key == GLFW_KEY_E) speed_m = -PI / 2;
     }
     if (action == GLFW_RELEASE) {
         if (key == GLFW_KEY_A) speed_x = 0;
@@ -133,16 +142,24 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         if (key == GLFW_KEY_S) speed_y = 0;
         if (key == GLFW_KEY_SPACE) speed_z = 0;
         if (key == GLFW_KEY_LEFT_SHIFT) speed_z = 0;
+        if (key == GLFW_KEY_Q) speed_m = 0;
+        if (key == GLFW_KEY_E) speed_m = 0;
     }
 }
 
 void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    if (lastx == 1337 && lasty == 1337) {
+        kamera->rotateKier(0, 0);
+        lastx = xpos;
+        lasty = ypos;
+        return;
+    }
     float xoffset = lastx - xpos;
     float yoffset = lasty - ypos;
     lastx = xpos;
     lasty = ypos;
 
-    const float sensitivity = 0.1f;
+    const float sensitivity = 0.15f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
@@ -166,12 +183,14 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
     glfwSetCursorPosCallback(window, mouseCallback);
-
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
-    loadOBJ("lego.obj", suzanne_vertices, suzanne_uvs, suzanne_normals);
-    cout << "lol";
-    //toar(vertices, suzanne_vertices);
-    //cout << vertices[0];
+    std::vector< glm::vec4 > temp_vertices;
+    std::vector< glm::vec2 > temp_uvs;
+    std::vector< glm::vec4 > temp_normals;
+    loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);
+    cout << "Załadowano" << endl;
+    podloga = new Model(temp_vertices, temp_normals, temp_uvs, podloga_color);
+    cout << "Stworzono" << endl;
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -192,8 +211,7 @@ void drawScene(GLFWwindow* window, glm::vec4 kier) {
     glm::mat4 V = glm::lookAt(
     kamera->getPos(),
     kamera->getPos() + glm::vec3(kier.x, kier.y, kier.z),
-    glm::vec3(0.0f, 1.0f, 0.0f)); //Wylicz macierz widoku
-    //std::cout << "x: " << kier.x << "y: " << kier.y << "z: " << kier.z;
+    glm::vec3(0.0, 1.0, 0.0)); //Wylicz macierz widoku
     glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatio, 0.01f, 50.0f); //Wylicz macierz rzutowania
 
     glm::mat4 M = glm::mat4(1.0f);
@@ -207,7 +225,12 @@ void drawScene(GLFWwindow* window, glm::vec4 kier) {
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
     glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
     glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
-
+    //glEnableVertexAttribArray(sp->a("vertex"));  //Włącz przesyłanie danych do atrybutu vertex
+    //glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &podloga->getVert()[0]); //Wskaż tablicę z danymi dla atrybutu vertex
+    //glEnableVertexAttribArray(sp->a("normal"));
+    //glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, &podloga->getNorm()[0]);
+    //glEnableVertexAttribArray(sp->a("color"));
+    //glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, podloga->getColors());
     glEnableVertexAttribArray(sp->a("vertex"));  //Włącz przesyłanie danych do atrybutu vertex
     glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, vertices); //Wskaż tablicę z danymi dla atrybutu vertex
     glEnableVertexAttribArray(sp->a("normal"));
@@ -271,7 +294,7 @@ int main()
         kamera->rotateKier(speed_x * glfwGetTime(), 0);
         glm::vec4 cos = glm::vec4(kamera->getKier(), 0);
         //kamera->setPos(kamera->getPos() + glm::vec3(speed_x * glfwGetTime(), 0, 0)); //Zwiększ/zmniejsz kąt obrotu na podstawie prędkości i czasu jaki upłynał od poprzedniej klatki
-        kamera->setPos(kamera->getPos() + glm::vec3(speed_y * glfwGetTime()*cos.x, speed_y * glfwGetTime()* cos.y + speed_z * glfwGetTime(), speed_y * glfwGetTime()* cos.z));
+        kamera->setPos(kamera->getPos() + kamera->getKier() * speed_y * (float) glfwGetTime() + kamera->getPrawo() * speed_m * (float) glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0));
         glfwSetTime(0); //Zeruj timer
         drawScene(window, cos); //Wykonaj procedurę rysującą
         glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
