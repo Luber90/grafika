@@ -105,16 +105,19 @@ float speed_z = 0;
 float speed_m = 0;
 float aspectRatio = 1;
 
-Model* podloga;
-float podloga_color[] = { 1.0, 1.0, 1.0, 1.0,
-                        1.0, 1.0, 1.0, 1.0,
-                        1.0, 1.0, 1.0, 1.0,
-                        1.0, 1.0, 1.0, 1.0,
-                        1.0, 1.0, 1.0, 1.0,
-                        1.0, 1.0, 1.0, 1.0,
-                        1.0, 1.0, 1.0, 1.0,
-                        1.0, 1.0, 1.0, 1.0 };
+Model* robal;
+////float podloga_color[] = { 1.0, 1.0, 1.0, 1.0,
+//                          1.0, 1.0, 1.0, 1.0, 
+//                          1.0, 1.0, 1.0, 1.0, 
+//                           1.0, 1.0, 1.0, 1.0, 
+//                          1.0, 1.0, 1.0, 1.0, 
+//                          1.0, 1.0, 1.0, 1.0, 
+//                          1.0, 1.0, 1.0, 1.0, 
+//                          1.0, 1.0, 1.0, 1.0};
+                          float * podloga_color;
 ShaderProgram* sp;
+
+
 
 glm::vec3 cubePos(0, 0, 3);
 
@@ -189,7 +192,8 @@ void initOpenGLProgram(GLFWwindow* window) {
     std::vector< glm::vec4 > temp_normals;
     loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);
     cout << "Załadowano" << endl;
-    podloga = new Model(temp_vertices, temp_normals, temp_uvs, podloga_color);
+    robal = new Model(temp_vertices, temp_normals, temp_uvs, podloga_color);
+    robal->SetPos(glm::vec3(0, 0, 7));
     cout << "Stworzono" << endl;
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -203,21 +207,19 @@ void freeOpenGLProgram(GLFWwindow* window) {
 }
 
 
-void drawScene(GLFWwindow* window, glm::vec4 kier) {
+void drawScene(GLFWwindow* window) {
     //************Tutaj umieszczaj kod rysujący obraz******************l
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
 
     glm::mat4 V = glm::lookAt(
     kamera->getPos(),
-    kamera->getPos() + glm::vec3(kier.x, kier.y, kier.z),
+    kamera->getPos() + kamera->getKier(),
     glm::vec3(0.0, 1.0, 0.0)); //Wylicz macierz widoku
     glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatio, 0.01f, 50.0f); //Wylicz macierz rzutowania
 
     glm::mat4 M = glm::mat4(1.0f);
     M = glm::translate(M, cubePos);
-    //M = glm::rotate(M, angle_y, glm::vec3(1.0f, 0.0f, 0.0f)); //Wylicz macierz modelu
-    //M = glm::rotate(M, angle_x, glm::vec3(0.0f, 1.0f, 0.0f)); //Wylicz macierz modelu
 
 
     sp->use();//Aktywacja programu cieniującego
@@ -225,17 +227,12 @@ void drawScene(GLFWwindow* window, glm::vec4 kier) {
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
     glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
     glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
-    //glEnableVertexAttribArray(sp->a("vertex"));  //Włącz przesyłanie danych do atrybutu vertex
-    //glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &podloga->getVert()[0]); //Wskaż tablicę z danymi dla atrybutu vertex
-    //glEnableVertexAttribArray(sp->a("normal"));
-    //glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, &podloga->getNorm()[0]);
-    //glEnableVertexAttribArray(sp->a("color"));
-    //glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, podloga->getColors());
+
     glEnableVertexAttribArray(sp->a("vertex"));  //Włącz przesyłanie danych do atrybutu vertex
     glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, vertices); //Wskaż tablicę z danymi dla atrybutu vertex
     glEnableVertexAttribArray(sp->a("normal"));
     glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, normals);
-    glEnableVertexAttribArray(sp->a("color"));
+    //glEnableVertexAttribArray(sp->a("color"));
     glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, colors);
 
 
@@ -244,9 +241,27 @@ void drawScene(GLFWwindow* window, glm::vec4 kier) {
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount); //Narysuj obiekt
 
-    glDisableVertexAttribArray(sp->a("vertex"));  //Wyłącz przesyłanie danych do atrybutu vertex
-    glDisableVertexAttribArray(sp->a("color"));  //Wyłącz przesyłanie danych do atrybutu color
-    glDisableVertexAttribArray(sp->a("normal"));  //Wyłącz przesyłanie danych do atrybutu normal
+    //ladowanie kostki
+    M = glm::mat4(1.0f);
+    M = glm::translate(M, robal->getPos());
+    glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+
+    glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &robal->getVert()[0]);
+    ///*cout << robal->getVert().size() << endl;
+    //for (int i = 0; i < robal->getVert().size(); i++) {
+    //    cout << "x: " << robal->getVert()[i].x << "y: " << robal->getVert()[i].y << "z: " << robal->getVert()[i].z << endl;
+    //}
+    //cout << "koniec" << endl;*/
+
+    glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, &robal->getNorm()[0]);
+    //
+    ////glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, colors);
+    glDrawArrays(GL_TRIANGLES, 0, robal->getVert().size());
+
+    glDisableVertexAttribArray(sp->a("vertex"));
+    glDisableVertexAttribArray(sp->a("color"));
+    glDisableVertexAttribArray(sp->a("normal"));
+
 
     glfwSwapBuffers(window); //Przerzuć tylny bufor na przedni
 
@@ -292,11 +307,11 @@ int main()
     {
         //kamera->setAngx(kamera->getAngx() + speed_x * glfwGetTime());
         kamera->rotateKier(speed_x * glfwGetTime(), 0);
-        glm::vec4 cos = glm::vec4(kamera->getKier(), 0);
+        //glm::vec4 cos = glm::vec4(kamera->getKier(), 0);
         //kamera->setPos(kamera->getPos() + glm::vec3(speed_x * glfwGetTime(), 0, 0)); //Zwiększ/zmniejsz kąt obrotu na podstawie prędkości i czasu jaki upłynał od poprzedniej klatki
         kamera->setPos(kamera->getPos() + kamera->getKier() * speed_y * (float) glfwGetTime() + kamera->getPrawo() * speed_m * (float) glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0));
         glfwSetTime(0); //Zeruj timer
-        drawScene(window, cos); //Wykonaj procedurę rysującą
+        drawScene(window); //Wykonaj procedurę rysującą
         glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
     }
 

@@ -1,6 +1,6 @@
 ﻿  ROBAL.cpp
 F:\grafika\ROBAL\ROBAL\snake.h(1852,1): warning C4305: "inicjowanie": obcięcie z "double" do "float"
-F:\grafika\ROBAL\ROBAL\ROBAL.cpp(157,19): warning C4244: "inicjowanie": konwersja z "double" do "float", możliwa utrata danych
-F:\grafika\ROBAL\ROBAL\ROBAL.cpp(158,19): warning C4244: "inicjowanie": konwersja z "double" do "float", możliwa utrata danych
-F:\grafika\ROBAL\ROBAL\ROBAL.cpp(294,36): warning C4244: "argument": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(160,19): warning C4244: "inicjowanie": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(161,19): warning C4244: "inicjowanie": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(309,36): warning C4244: "argument": konwersja z "double" do "float", możliwa utrata danych
   ROBAL.vcxproj -> F:\grafika\ROBAL\Debug\ROBAL.exe

@@ -2,9 +2,10 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "camera.h"
 
 class Model {
-private:
+protected:
 	std::vector<glm::vec4> vertices;
 	std::vector<glm::vec4> normals;
 	std::vector<glm::vec2> uvs;
@@ -23,4 +24,13 @@ public:
 	std::vector<glm::vec4> getNorm();
 	std::vector<glm::vec2> getUv();
 	glm::vec3 getPos();
+	void SetPos(glm::vec3 v);
+};
+
+class Robal: public Model {
+private:
+	glm::vec3 kier;
+	Camera* kamera;
+public:
+
 };

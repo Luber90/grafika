@@ -16,3 +16,7 @@ std::vector<glm::vec2> Model::getUv() {
 glm::vec3 Model::getPos() {
 	return pos;
 }
+
+void Model::SetPos(glm::vec3 v) {
+	pos = v;
+}
