@@ -2,7 +2,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "camera.h"
+#include <glm/gtc/type_ptr.hpp>
+#include "shaderprogram.h"
 
 class Model {
 protected:
@@ -25,12 +26,4 @@ public:
 	std::vector<glm::vec2> getUv();
 	glm::vec3 getPos();
 	void SetPos(glm::vec3 v);
-};
-
-class Robal: public Model {
-private:
-	glm::vec3 kier;
-	Camera* kamera;
-public:
-
 };

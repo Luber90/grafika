@@ -1,9 +1,13 @@
 #include "camera.h"
 
+
 Camera::Camera(glm::vec3 pos) {
+	mode = 0;
+	ang = 0;
 	position = pos;
 	kierunek = glm::vec3(0, 0, 1);
 	prawo = glm::vec3(1, 0, 0);
+	robak = nullptr;
 }
 
 void Camera::setPos(glm::vec3 v) {
@@ -22,7 +26,12 @@ glm::vec3 Camera::getPrawo() {
 	return prawo;
 }
 
+float Camera::getAng() {
+	return ang;
+}
+
 void Camera::rotateKier(float angx, float angy) {
+	ang += angx;
 	glm::mat4 M = glm::mat4(1.0f);
 	M = glm::rotate(M, angx, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::vec4 tmp = M * glm::vec4(prawo, 0);
@@ -34,4 +43,17 @@ void Camera::rotateKier(float angx, float angy) {
 	kierunek.x = tmp.x;
 	kierunek.y = tmp.y;
 	kierunek.z = tmp.z;
+}
+
+void Camera::changeMode() {
+	switch (mode) {
+	case 0:
+		mode = 1;
+		position = robak->getPos() + glm::vec3(0, 10, 0);
+		break;
+	case 1:
+		mode = 0;
+		position = robak->getPos() + glm::vec3(0, 0, -3);
+		break;
+	}
 }

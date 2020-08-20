@@ -14,7 +14,7 @@
 #include "snake.h"
 #include "shaderprogram.h"
 #include "camera.h"
-#include "Model.h"
+#include "robalek.h"
 
 using namespace std;
 
@@ -105,16 +105,8 @@ float speed_z = 0;
 float speed_m = 0;
 float aspectRatio = 1;
 
-Model* robal;
-////float podloga_color[] = { 1.0, 1.0, 1.0, 1.0,
-//                          1.0, 1.0, 1.0, 1.0, 
-//                          1.0, 1.0, 1.0, 1.0, 
-//                           1.0, 1.0, 1.0, 1.0, 
-//                          1.0, 1.0, 1.0, 1.0, 
-//                          1.0, 1.0, 1.0, 1.0, 
-//                          1.0, 1.0, 1.0, 1.0, 
-//                          1.0, 1.0, 1.0, 1.0};
-                          float * podloga_color;
+Robal* robal;
+float * podloga_color;
 ShaderProgram* sp;
 
 
@@ -137,6 +129,18 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         if (key == GLFW_KEY_LEFT_SHIFT) speed_z = -PI / 2;
         if (key == GLFW_KEY_Q) speed_m = PI / 2;
         if (key == GLFW_KEY_E) speed_m = -PI / 2;
+        if (key == GLFW_KEY_F) {
+            switch (kamera->getMode()) {
+            case 0:
+                kamera->changeMode();
+                robal->changeMode();
+                break;
+            case 1:
+                kamera->changeMode();
+                robal->changeMode();
+                break;
+            }
+        }
     }
     if (action == GLFW_RELEASE) {
         if (key == GLFW_KEY_A) speed_x = 0;
@@ -192,8 +196,9 @@ void initOpenGLProgram(GLFWwindow* window) {
     std::vector< glm::vec4 > temp_normals;
     loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);
     cout << "Załadowano" << endl;
-    robal = new Model(temp_vertices, temp_normals, temp_uvs, podloga_color);
+    robal = new Robal(temp_vertices, temp_normals, temp_uvs, podloga_color, kamera);
     robal->SetPos(glm::vec3(0, 0, 7));
+    kamera->setRob(robal);
     cout << "Stworzono" << endl;
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -236,40 +241,17 @@ void drawScene(GLFWwindow* window) {
     glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, colors);
 
 
-    //glEnableVertexAttribArray(sp->a("normal"));  //Włącz przesyłanie danych do atrybutu normal
-    //glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, normals); //Wskaż tablicę z danymi dla atrybutu normal
-
     glDrawArrays(GL_TRIANGLES, 0, vertexCount); //Narysuj obiekt
 
     //ladowanie kostki
-    M = glm::mat4(1.0f);
-    M = glm::translate(M, robal->getPos());
-    glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+    
+    robal->draw(sp, P, V);
 
-    glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &robal->getVert()[0]);
-    ///*cout << robal->getVert().size() << endl;
-    //for (int i = 0; i < robal->getVert().size(); i++) {
-    //    cout << "x: " << robal->getVert()[i].x << "y: " << robal->getVert()[i].y << "z: " << robal->getVert()[i].z << endl;
-    //}
-    //cout << "koniec" << endl;*/
-
-    glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, &robal->getNorm()[0]);
-    //
-    ////glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, colors);
-    glDrawArrays(GL_TRIANGLES, 0, robal->getVert().size());
-
-    glDisableVertexAttribArray(sp->a("vertex"));
-    glDisableVertexAttribArray(sp->a("color"));
     glDisableVertexAttribArray(sp->a("normal"));
-
-
+    glDisableVertexAttribArray(sp->a("vertex"));
     glfwSwapBuffers(window); //Przerzuć tylny bufor na przedni
 
 }
-
-//int* normcalc(int a, int b, int c) {
-//        
-//}
 
 int main()
 {
@@ -305,10 +287,7 @@ int main()
     glfwSetTime(0); //Zeruj timer
     while (!glfwWindowShouldClose(window)) //Tak długo jak okno nie powinno zostać zamknięte
     {
-        //kamera->setAngx(kamera->getAngx() + speed_x * glfwGetTime());
         kamera->rotateKier(speed_x * glfwGetTime(), 0);
-        //glm::vec4 cos = glm::vec4(kamera->getKier(), 0);
-        //kamera->setPos(kamera->getPos() + glm::vec3(speed_x * glfwGetTime(), 0, 0)); //Zwiększ/zmniejsz kąt obrotu na podstawie prędkości i czasu jaki upłynał od poprzedniej klatki
         kamera->setPos(kamera->getPos() + kamera->getKier() * speed_y * (float) glfwGetTime() + kamera->getPrawo() * speed_m * (float) glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0));
         glfwSetTime(0); //Zeruj timer
         drawScene(window); //Wykonaj procedurę rysującą
