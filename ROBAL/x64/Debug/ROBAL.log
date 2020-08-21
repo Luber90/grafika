@@ -1,7 +1,0 @@
-﻿  camera.cpp
-F:\grafika\ROBAL\ROBAL\camera.h(4,10): fatal error C1083: Nie można otworzyć pliku dołącz: 'glm/glm.hpp': No such file or directory
-  ROBAL.cpp
-F:\grafika\ROBAL\ROBAL\ROBAL.cpp(2,10): fatal error C1083: Nie można otworzyć pliku dołącz: 'GL/glew.h': No such file or directory
-  shaderprogram.cpp
-F:\grafika\ROBAL\ROBAL\shaderprogram.h(25,10): fatal error C1083: Nie można otworzyć pliku dołącz: 'GL/glew.h': No such file or directory
-  Generowanie kodu...

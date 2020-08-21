@@ -5,6 +5,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "shaderprogram.h"
 
+//klasa modelu, uzywa jej robal, robal mial byc tutaj ale sie bugowalo jak camera.h zawierala model.h i odwrotnie i naraz chcialy z siebie obiekty to robal.h dziedziczy stad
+
 class Model {
 protected:
 	std::vector<glm::vec4> vertices;

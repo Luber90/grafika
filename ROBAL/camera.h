@@ -5,12 +5,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Model.h"
 
+//jakies potrzebne rzeczy do kamerki
 
 class Camera {
 private:
 	glm::vec3 position;
-	glm::vec3 kierunek;
-	glm::vec3 prawo;
+	glm::vec3 kierunek; //kierunek patrzenia
+	glm::vec3 prawo;  //kierunek w prawo od kamery
 	float ang;
 	int mode;
 	Model* robak;

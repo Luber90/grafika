@@ -49,11 +49,11 @@ void Camera::changeMode() {
 	switch (mode) {
 	case 0:
 		mode = 1;
-		position = robak->getPos() + glm::vec3(0, 10, 0);
+		position = robak->getPos() + glm::vec3(0, 1, 0);
 		break;
 	case 1:
 		mode = 0;
-		position = robak->getPos() + glm::vec3(0, 0, -3);
+		position = robak->getPos() + glm::vec3(-1, 0, 0);
 		break;
 	}
 }

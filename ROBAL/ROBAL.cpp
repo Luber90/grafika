@@ -129,7 +129,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         if (key == GLFW_KEY_LEFT_SHIFT) speed_z = -PI / 2;
         if (key == GLFW_KEY_Q) speed_m = PI / 2;
         if (key == GLFW_KEY_E) speed_m = -PI / 2;
-        if (key == GLFW_KEY_F) {
+        if (key == GLFW_KEY_F) {     //zmiana na bycie na robalu i na odwrot
             switch (kamera->getMode()) {
             case 0:
                 kamera->changeMode();
@@ -191,13 +191,13 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glfwSetKeyCallback(window, keyCallback);
     glfwSetCursorPosCallback(window, mouseCallback);
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
-    std::vector< glm::vec4 > temp_vertices;
+    std::vector< glm::vec4 > temp_vertices;     //wektory do w czytanych rzeczy
     std::vector< glm::vec2 > temp_uvs;
     std::vector< glm::vec4 > temp_normals;
-    loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);
+    loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
     cout << "Załadowano" << endl;
-    robal = new Robal(temp_vertices, temp_normals, temp_uvs, podloga_color, kamera);
-    robal->SetPos(glm::vec3(0, 0, 7));
+    robal = new Robal(temp_vertices, temp_normals, temp_uvs, podloga_color, kamera); //tworzenie obiektu robaka z wektorami załądowanego modelu, podloga color jest bezuzyteczne
+    robal->SetPos(glm::vec3(0, 0, 7)); //polozenie robala
     kamera->setRob(robal);
     cout << "Stworzono" << endl;
 	glEnable(GL_BLEND);
@@ -287,8 +287,8 @@ int main()
     glfwSetTime(0); //Zeruj timer
     while (!glfwWindowShouldClose(window)) //Tak długo jak okno nie powinno zostać zamknięte
     {
-        kamera->rotateKier(speed_x * glfwGetTime(), 0);
-        kamera->setPos(kamera->getPos() + kamera->getKier() * speed_y * (float) glfwGetTime() + kamera->getPrawo() * speed_m * (float) glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0));
+        kamera->rotateKier(speed_x * glfwGetTime(), 0); //obraca kamere o  kat odpowiedni do speeda z inputu
+        kamera->setPos(kamera->getPos() + kamera->getKier() * speed_y * (float) glfwGetTime() + kamera->getPrawo() * speed_m * (float) glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
         glfwSetTime(0); //Zeruj timer
         drawScene(window); //Wykonaj procedurę rysującą
         glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
