@@ -1,31 +1,27 @@
 #include "robalek.h"
 
-Robal::Robal(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, float* color, Camera* kam) : Model(vert, norm, uv, color) { //konstruktor, uzwajacy kontruktora Model
+Robal::Robal(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, Camera* kam, glm::vec3 posi){ 
 	kier = glm::vec3(0, 0, 1);
 	kamera = kam;
+	segment1 = new Segment(vert, norm, uv);
+	segment2 = new Segment(vert, norm, uv);
+	segment3 = new Segment(vert, norm, uv);
+	pos = posi;
+	animeang = 0;
 }
 
 void Robal::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) { //dopiero kiedy rysowanie jest tutaj to dziala
-	sp->use();
-	glm::mat4 M = glm::mat4(1.0f);
-	M = glm::translate(M, pos);
 	if (kameraMode == 1) {
 		pos = kamera->getPos() + glm::vec3(0, -1, 0);
+		glm::mat4 M = segment2->draw(sp, P, V, pos, kamera->getAng());
+		segment1->draw2(sp, P, V, M, glm::vec3(0, 0, 1), -animeang);
+		segment3->draw2(sp, P, V, M, glm::vec3(0, 0, -1), animeang);
+	}	
+	else {
+		glm::mat4 M = segment2->draw(sp, P, V, pos, 0);
+		segment1->draw2(sp, P, V, M, glm::vec3(0, 0, 1), 0);
+		segment3->draw2(sp, P, V, M, glm::vec3(0, 0, -1), 0);
 	}
-	
-	if (kameraMode == 1) {
-		M = glm::rotate(M, kamera->getAng(), glm::vec3(0, 1, 0));
-	}
-	M = glm::scale(M, glm::vec3(0.25, 0.25, 0.25));
-	glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
-	glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
-	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
-	glEnableVertexAttribArray(sp->a("vertex"));
-	glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &vertices[0]);
-	glEnableVertexAttribArray(sp->a("normal"));
-	glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, &normals[0]);
-	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-
 }
 
 void Robal::changeMode() {
@@ -37,4 +33,15 @@ void Robal::changeMode() {
 		kameraMode = 0;
 		break;
 	}
+}
+
+glm::vec3 Robal::getPos() {
+	return pos;
+}
+void Robal::SetPos(glm::vec3 v) {
+	pos = v;
+}
+
+void Robal::setAnimeAng(float a) {
+	animeang = a;
 }

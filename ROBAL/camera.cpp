@@ -7,7 +7,7 @@ Camera::Camera(glm::vec3 pos) {
 	position = pos;
 	kierunek = glm::vec3(0, 0, 1);
 	prawo = glm::vec3(1, 0, 0);
-	robak = nullptr;
+	robpos = nullptr;
 }
 
 void Camera::setPos(glm::vec3 v) {
@@ -49,11 +49,11 @@ void Camera::changeMode() {
 	switch (mode) {
 	case 0:
 		mode = 1;
-		position = robak->getPos() + glm::vec3(0, 1, 0);
+		position = *robpos + glm::vec3(0, 0.75, 0);
 		break;
 	case 1:
 		mode = 0;
-		position = robak->getPos() + glm::vec3(-1, 0, 0);
+		position = *robpos + glm::vec3(-1, 0, 0);
 		break;
 	}
 }

@@ -121,8 +121,14 @@ int vertexCount = myTeapotVertexCount;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
-        if (key == GLFW_KEY_A) speed_x = PI / 2;
-        if (key == GLFW_KEY_D) speed_x = -PI / 2;
+        if (key == GLFW_KEY_A) {
+            speed_x = PI / 2;
+            robal->setAnimeAng(-10);
+        }
+        if (key == GLFW_KEY_D) {
+            speed_x = -PI / 2;
+            robal->setAnimeAng(10);
+        }
         if (key == GLFW_KEY_W) speed_y = PI / 2;
         if (key == GLFW_KEY_S) speed_y = -PI / 2;
         if (key == GLFW_KEY_SPACE) speed_z = PI / 2;
@@ -143,8 +149,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         }
     }
     if (action == GLFW_RELEASE) {
-        if (key == GLFW_KEY_A) speed_x = 0;
-        if (key == GLFW_KEY_D) speed_x = 0;
+        if (key == GLFW_KEY_A) {
+            speed_x = 0;
+            robal->setAnimeAng(0);
+        }
+        if (key == GLFW_KEY_D) {
+            speed_x = 0;
+            robal->setAnimeAng(0);
+        }
         if (key == GLFW_KEY_W) speed_y = 0;
         if (key == GLFW_KEY_S) speed_y = 0;
         if (key == GLFW_KEY_SPACE) speed_z = 0;
@@ -169,7 +181,17 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
     const float sensitivity = 0.15f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
-
+    if (xoffset != 0) {
+        if (xoffset > 0) {
+            robal->setAnimeAng(-10);
+        }
+        else {
+            robal->setAnimeAng(10);
+        }
+    }
+    else {
+        robal->setAnimeAng(0);
+    }
     kamera->rotateKier(glm::radians(xoffset), glm::radians(yoffset));
 }
 
@@ -185,7 +207,7 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 
 void initOpenGLProgram(GLFWwindow* window) {
 	//************Tutaj umieszczaj kod, który należy wykonać raz, na początku programu************
-	glClearColor(0, 0, 0, 1);
+	glClearColor(0, 0.35, 0.6, 1);
 	glEnable(GL_DEPTH_TEST);
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
@@ -194,11 +216,11 @@ void initOpenGLProgram(GLFWwindow* window) {
     std::vector< glm::vec4 > temp_vertices;     //wektory do w czytanych rzeczy
     std::vector< glm::vec2 > temp_uvs;
     std::vector< glm::vec4 > temp_normals;
-    loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
+    loadOBJ("cylindersmall.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
     cout << "Załadowano" << endl;
-    robal = new Robal(temp_vertices, temp_normals, temp_uvs, podloga_color, kamera); //tworzenie obiektu robaka z wektorami załądowanego modelu, podloga color jest bezuzyteczne
-    robal->SetPos(glm::vec3(0, 0, 7)); //polozenie robala
-    kamera->setRob(robal);
+    robal = new Robal(temp_vertices, temp_normals, temp_uvs, kamera, glm::vec3(0, 0, 7)); //tworzenie obiektu robaka z wektorami załądowanego modelu
+    //robal->SetPos(glm::vec3(0, 0, 7)); //polozenie robala
+    kamera->setRob(robal->PosPtr()); //kamera ma wskaźnik na pozycje robala
     cout << "Stworzono" << endl;
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

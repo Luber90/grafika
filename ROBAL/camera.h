@@ -3,7 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "Model.h"
+
 
 //jakies potrzebne rzeczy do kamerki
 
@@ -14,7 +14,7 @@ private:
 	glm::vec3 prawo;  //kierunek w prawo od kamery
 	float ang;
 	int mode;
-	Model* robak;
+	glm::vec3* robpos;
 public:
 	Camera(glm::vec3 pos);
 	glm::vec3 getPos();
@@ -25,5 +25,5 @@ public:
 	float getAng();
 	void changeMode();
 	int getMode() { return mode; }
-	void setRob(Model* rob) { robak = rob; }
+	void setRob(glm::vec3* rob) { robpos = rob; }
 };
