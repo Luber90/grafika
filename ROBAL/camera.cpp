@@ -8,6 +8,8 @@ Camera::Camera(glm::vec3 pos) {
 	kierunek = glm::vec3(0, 0, 1);
 	prawo = glm::vec3(1, 0, 0);
 	robpos = nullptr;
+	acceleration = glm::vec3(0, 0, 0);
+	onGround = false;
 }
 
 void Camera::setPos(glm::vec3 v) {

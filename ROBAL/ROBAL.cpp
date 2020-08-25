@@ -17,10 +17,11 @@
 #include "robalek.h"
 #include "Model.h"
 #include "myCube.h"
+#include "Collisions.h"
 
 using namespace std;
 
-Camera* kamera = new Camera(glm::vec3(0, 0, 0));
+Camera* kamera = new Camera(glm::vec3(0, 1, 0));
 
 const float PI = 3.141592653589793f;
 
@@ -109,6 +110,7 @@ float speed_m = 0;
 float aspectRatio = 1;
 
 Robal* robal;
+Floor* podloga;
 float* podloga_color;
 ShaderProgram* sp;
 
@@ -143,8 +145,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 		if (key == GLFW_KEY_W) speed_y = 15;
 		if (key == GLFW_KEY_S) speed_y = -15;
-		if (key == GLFW_KEY_SPACE) speed_z = PI / 2;
-		if (key == GLFW_KEY_LEFT_SHIFT) speed_z = -PI / 2;
+		if (key == GLFW_KEY_SPACE) { //speed_z = PI / 2;
+			if (kamera->getOnGround()) {
+				kamera->addForce(glm::vec3(0, 10, 0));
+				kamera->setOnGround(false);
+			}
+		}
+		//if (key == GLFW_KEY_LEFT_SHIFT) speed_z = -PI / 2;
 		if (key == GLFW_KEY_Q) speed_m = PI / 2;
 		if (key == GLFW_KEY_E) speed_m = -PI / 2;
 		if (key == GLFW_KEY_F) {     //zmiana na bycie na robalu i na odwrot
@@ -171,8 +178,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 		if (key == GLFW_KEY_W) speed_y = 0;
 		if (key == GLFW_KEY_S) speed_y = 0;
-		if (key == GLFW_KEY_SPACE) speed_z = 0;
-		if (key == GLFW_KEY_LEFT_SHIFT) speed_z = 0;
+		//if (key == GLFW_KEY_SPACE) speed_z = 0;
+		//if (key == GLFW_KEY_LEFT_SHIFT) speed_z = 0;
 		if (key == GLFW_KEY_Q) speed_m = 0;
 		if (key == GLFW_KEY_E) speed_m = 0;
 	}
@@ -231,6 +238,8 @@ void initOpenGLProgram(GLFWwindow* window) {
 	loadOBJ("cylindersmall.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
 	cout << "Załadowano" << endl;
 	robal = new Robal(temp_vertices, temp_normals, temp_uvs, kamera, glm::vec3(0, 0, 7)); //tworzenie obiektu robaka z wektorami załądowanego modelu
+	loadOBJ("square.obj", temp_vertices, temp_uvs, temp_normals);
+	podloga = new Floor(temp_vertices, temp_normals, temp_uvs, new FloorCollision(glm::vec3(-100, 0, -100), glm::vec3(100, 0, 100)));
 	//robal->SetPos(glm::vec3(0, 0, 7)); //polozenie robala
 	kamera->setRob(robal->PosPtr()); //kamera ma wskaźnik na pozycje robala
 	cout << "Stworzono" << endl;
@@ -312,11 +321,12 @@ void drawScene(GLFWwindow* window) {
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount); //Narysuj obiekt
 
 
-	drawObject(cubeVertices, cubeNormals, cubeColors, vertexCount, glm::vec3(0, -1, 0), P, V, M, 50, 0.1, 50, 0);//narysowałem podłogę jak kox
+	//drawObject(cubeVertices, cubeNormals, cubeColors, vertexCount, glm::vec3(0, -1, 0), P, V, M, 50, 0.1, 50, 0);//narysowałem podłogę jak kox
 
 	//ladowanie kostki
 
 	robal->draw(sp, P, V);
+	podloga->draw(sp, P, V);
 
 	glDisableVertexAttribArray(sp->a("normal"));
 	glDisableVertexAttribArray(sp->a("vertex"));
@@ -361,6 +371,11 @@ int main()
 	{
 		kamera->rotateKier(speed_x * glfwGetTime(), 0); //obraca kamere o  kat odpowiedni do speeda z inputu
 		kamera->setPos(kamera->getPos() + kamera->getKier() * speed_y * (float)glfwGetTime() + kamera->getPrawo() * speed_m * (float)glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
+		if (!kamera->getOnGround()) {
+			kamera->addForce(glm::vec3(0, -0.25, 0));
+		}
+		kamera->applyForce(glfwGetTime());
+		podloga->colli(kamera);
 		glfwSetTime(0); //Zeruj timer
 		drawScene(window); //Wykonaj procedurę rysującą
 		glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.

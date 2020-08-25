@@ -15,6 +15,8 @@ private:
 	float ang;
 	int mode;
 	glm::vec3* robpos;
+	glm::vec3 acceleration;
+	bool onGround;
 public:
 	Camera(glm::vec3 pos);
 	glm::vec3 getPos();
@@ -26,4 +28,22 @@ public:
 	void changeMode();
 	int getMode() { return mode; }
 	void setRob(glm::vec3* rob) { robpos = rob; }
+	void addForce(glm::vec3 f) {
+		acceleration += f;
+		if (acceleration.length() > 20) {
+			acceleration = glm::normalize(acceleration) * 10.0f;
+		}
+	}
+	void applyForce(float time) {
+		position += acceleration * time;
+	}
+	void setOnGround(bool a) {
+		onGround = a;
+	}
+	bool getOnGround() {
+		return onGround;
+	}
+	void zeroForce() {
+		acceleration = glm::vec3(0, 0, 0);
+	}
 };

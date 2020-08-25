@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="Collisions.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ROBAL.cpp" />
     <ClCompile Include="robalek.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="myTeapot.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Collisions.h" />
     <ClInclude Include="robalek.h" />
     <ClInclude Include="snake.h" />
     <ClInclude Include="shaderprogram.h" />
