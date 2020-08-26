@@ -1,6 +1,6 @@
 #include "robalek.h"
 
-Robal::Robal(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, Camera* kam, glm::vec3 posi){ 
+Robal::Robal(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, Camera* kam, glm::vec3 posi, RobalCollision* rr){
 	kier = glm::vec3(0, 0, 1);
 	kamera = kam;
 	segment1 = new Segment(vert, norm, uv);
@@ -8,6 +8,7 @@ Robal::Robal(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vect
 	segment3 = new Segment(vert, norm, uv);
 	pos = posi;
 	animeang = 0;
+	colli = rr;
 }
 
 void Robal::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) { //dopiero kiedy rysowanie jest tutaj to dziala
@@ -44,4 +45,8 @@ void Robal::SetPos(glm::vec3 v) {
 
 void Robal::setAnimeAng(float a) {
 	animeang = a;
+}
+
+bool Robal::coll() {
+	return colli->collAct(kamera, pos);
 }

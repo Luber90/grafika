@@ -22,3 +22,8 @@ public:
 	}
 	void collAct(Camera* c);
 };
+
+class RobalCollision{
+public:
+	bool collAct(Camera* c, glm::vec3 pos);
+};

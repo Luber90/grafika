@@ -48,6 +48,9 @@ public:
 	Floor(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, FloorCollision* c) : Model(vert, norm, uv) {
 		coll = c;
 	}
+	~Floor() {
+		delete coll;
+	}
 	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
 	void colli(Camera* c);
 };

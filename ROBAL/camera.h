@@ -17,6 +17,7 @@ private:
 	glm::vec3* robpos;
 	glm::vec3 acceleration;
 	bool onGround;
+	float angvert;
 public:
 	Camera(glm::vec3 pos);
 	glm::vec3 getPos();
@@ -45,5 +46,8 @@ public:
 	}
 	void zeroForce() {
 		acceleration = glm::vec3(0, 0, 0);
+	}
+	float getVert() {
+		return angvert;
 	}
 };

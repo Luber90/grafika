@@ -102,7 +102,7 @@ bool loadOBJ(const char* path, std::vector < glm::vec4 >& out_vertices, std::vec
 	return true;
 }
 
-double lastx = 1337, lasty = 1337;
+double lastx = 999999, lasty = 999999;
 float speed_x = 0;
 float speed_y = 0;
 float speed_z = 0;
@@ -155,15 +155,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_Q) speed_m = PI / 2;
 		if (key == GLFW_KEY_E) speed_m = -PI / 2;
 		if (key == GLFW_KEY_F) {     //zmiana na bycie na robalu i na odwrot
-			switch (kamera->getMode()) {
-			case 0:
-				kamera->changeMode();
-				robal->changeMode();
-				break;
-			case 1:
-				kamera->changeMode();
-				robal->changeMode();
-				break;
+			if (robal->coll()) {
+				switch (kamera->getMode()) {
+				case 0:
+					kamera->changeMode();
+					robal->changeMode();
+					break;
+				case 1:
+					kamera->changeMode();
+					robal->changeMode();
+					break;
+				}
 			}
 		}
 	}
@@ -186,20 +188,26 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
-	if (lastx == 1337 && lasty == 1337) {
+	if (lastx == 999999 && lasty == 999999) {
 		kamera->rotateKier(0, 0);
 		lastx = xpos;
 		lasty = ypos;
 		return;
 	}
 	float xoffset = lastx - xpos;
-	float yoffset = lasty - ypos;
+	float yoffset = ypos - lasty;
 	lastx = xpos;
 	lasty = ypos;
 
 	const float sensitivity = 0.05f;
 	xoffset *= sensitivity;
 	yoffset *= sensitivity;
+	if (kamera->getVert() >= PI / 2 && yoffset > 0) {
+		yoffset = 0;
+	}
+	if (kamera->getVert() <= -PI / 2 && yoffset < 0) {
+		yoffset = 0;
+	}
 	if (xoffset != 0) {
 		if (xoffset > 0) {
 			robal->setAnimeAng(-10);
@@ -212,6 +220,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 		robal->setAnimeAng(0);
 	}
 	kamera->rotateKier(glm::radians(xoffset), glm::radians(yoffset));
+	
 }
 
 void error_callback(int error, const char* description) {
@@ -229,6 +238,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glClearColor(0, 0.35, 0.6, 1);
 	glEnable(GL_DEPTH_TEST);
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, mouseCallback);
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
@@ -237,7 +247,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	std::vector< glm::vec4 > temp_normals;
 	loadOBJ("cylindersmall.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
 	cout << "Załadowano" << endl;
-	robal = new Robal(temp_vertices, temp_normals, temp_uvs, kamera, glm::vec3(0, 0, 7)); //tworzenie obiektu robaka z wektorami załądowanego modelu
+	robal = new Robal(temp_vertices, temp_normals, temp_uvs, kamera, glm::vec3(0, 0, 7), new RobalCollision); //tworzenie obiektu robaka z wektorami załądowanego modelu
 	loadOBJ("square.obj", temp_vertices, temp_uvs, temp_normals);
 	podloga = new Floor(temp_vertices, temp_normals, temp_uvs, new FloorCollision(glm::vec3(-100, 0, -100), glm::vec3(100, 0, 100)));
 	//robal->SetPos(glm::vec3(0, 0, 7)); //polozenie robala
@@ -370,7 +380,7 @@ int main()
 	while (!glfwWindowShouldClose(window)) //Tak długo jak okno nie powinno zostać zamknięte
 	{
 		kamera->rotateKier(speed_x * glfwGetTime(), 0); //obraca kamere o  kat odpowiedni do speeda z inputu
-		kamera->setPos(kamera->getPos() + kamera->getKier() * speed_y * (float)glfwGetTime() + kamera->getPrawo() * speed_m * (float)glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
+		kamera->setPos(kamera->getPos() + glm::vec3(kamera->getKier().x, 0, kamera->getKier().z) * speed_y * (float)glfwGetTime() + kamera->getPrawo() * speed_m * (float)glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
 		if (!kamera->getOnGround()) {
 			kamera->addForce(glm::vec3(0, -0.25, 0));
 		}
@@ -380,7 +390,7 @@ int main()
 		drawScene(window); //Wykonaj procedurę rysującą
 		glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
 	}
-
+	
 	freeOpenGLProgram(window);
 
 	glfwDestroyWindow(window); //Usuń kontekst OpenGL i okno
