@@ -1,2 +1,11 @@
-﻿  Collisions.cpp
+﻿  ROBAL.cpp
+F:\grafika\ROBAL\ROBAL\snake.h(1852,1): warning C4305: "inicjowanie": obcięcie z "double" do "float"
+F:\grafika\ROBAL\ROBAL\Model.h(112,21): warning C4018: "<": niezgodność typu ze znakiem/bez znaku
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(17,10): warning C4067: nieoczekiwane tokeny występujące po dyrektywie preprocesora - oczekiwano nowego wiersza
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(183,16): warning C4244: "inicjowanie": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(184,16): warning C4244: "inicjowanie": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(231,30): warning C4305: "argument": obcięcie z "double" do "GLclampf"
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(372,30): warning C4244: "argument": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(378,37): warning C4244: "argument": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\ROBAL.cpp(381,33): warning C4244: "argument": konwersja z "double" do "float", możliwa utrata danych
   ROBAL.vcxproj -> F:\grafika\ROBAL\Debug\ROBAL.exe

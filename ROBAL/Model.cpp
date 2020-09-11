@@ -66,3 +66,84 @@ void Floor::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) {
 void Floor::colli(Camera* c) {
 	coll->collAct(c);
 }
+
+void Bullet::move(float t) {
+	pos += 10 * t * kier;
+}
+
+void Bullet::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) {
+	sp->use();
+	glm::mat4 M = glm::mat4(1.0f);
+	M = glm::translate(M, pos);
+	M = glm::scale(M, glm::vec3(0.01, 0.01, 0.01));
+	glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
+	glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
+	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+	glEnableVertexAttribArray(sp->a("vertex"));
+	glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &vertices[0]);
+	glEnableVertexAttribArray(sp->a("normal"));
+	glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, &normals[0]);
+	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+}
+
+void BulletVec::add(glm::vec3 pos, glm::vec3 kier) {
+	vector.push_back(new Bullet(vertices, normals, uvs, kier, pos));
+}
+
+void BulletVec::set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv) {
+	vertices = vert;
+	normals = norm;
+	uvs = uv;
+}
+
+int BulletVec::size() {
+	return vector.size();
+}
+
+Bullet* BulletVec::operator[] (int i) {
+	return vector[i];
+}
+
+void BulletVec::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) {
+	for (int i = 0; i < vector.size(); i++) {
+		vector[i]->draw(sp, P, V);
+	}
+}
+
+void Enemy::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) {
+	sp->use();
+	glm::mat4 M = glm::mat4(1.0f);
+	M = glm::translate(M, pos);
+	glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
+	glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
+	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+	glEnableVertexAttribArray(sp->a("vertex"));
+	glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &vertices[0]);
+	glEnableVertexAttribArray(sp->a("normal"));
+	glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, &normals[0]);
+	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+}
+
+void EnemyVector::add(glm::vec3 pos) {
+	vector.push_back(new Enemy(vertices, normals, uvs, pos));
+}
+
+int EnemyVector::size() {
+	return vector.size();
+}
+
+Enemy* EnemyVector::operator[] (int i) {
+	return vector[i];
+}
+
+void EnemyVector::set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv) {
+	vertices = vert;
+	normals = norm;
+	uvs = uv;
+}
+
+void EnemyVector::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) {
+	for (int i = 0; i < vector.size(); i++) {
+		vector[i]->draw(sp, P, V);
+	}
+}

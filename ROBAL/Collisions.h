@@ -27,3 +27,23 @@ class RobalCollision{
 public:
 	bool collAct(Camera* c, glm::vec3 pos);
 };
+
+class BulletCollision {
+public:
+	bool collAct();
+};
+
+class EnemyCollision {
+public:
+	glm::vec3 leftdown, rightup;
+	EnemyCollision(glm::vec3 a, glm::vec3 b) {
+		leftdown = a;
+		rightup = b;
+	}
+	bool collAct(glm::vec3 pos) {
+		//glm::vec3 I = 0.5f*(rightup - leftdown);
+		//glm::vec3 V = pos - I;
+		if ((pos.x >= leftdown.x && pos.x <= rightup.x) && (pos.y >= leftdown.y && pos.y <= rightup.y) && (pos.z >= leftdown.z && pos.z <= rightup.z)) return true;
+		else return false;
+	}
+};

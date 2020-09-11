@@ -10,17 +10,16 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include "myTeapot.h"
 #include "snake.h"
 #include "shaderprogram.h"
 #include "camera.h"
 #include "robalek.h"
-#include "Model.h"
-#include "myCube.h"
+#include "Model.h""
 #include "Collisions.h"
 
 using namespace std;
-
+BulletVec bulletVector;
+EnemyVector enemyvector;
 Camera* kamera = new Camera(glm::vec3(0, 1, 0));
 
 const float PI = 3.141592653589793f;
@@ -118,19 +117,6 @@ ShaderProgram* sp;
 
 glm::vec3 cubePos(0, 0, 3);
 
-float* vertices = myTeapotVertices;
-float* normals = myTeapotVertexNormals;
-float* texCoords = myTeapotTexCoords;
-float* colors = myTeapotColors;
-int vertexCount = myTeapotVertexCount;
-
-//Odkomentuj, żeby rysować kostkę
-float* cubeVertices = myCubeVertices;
-float* cubeNormals = myCubeNormals;
-float* cubeTexCoords = myCubeTexCoords;
-float* cubeColors = myCubeColors;
-int cubeVertexCount = myCubeVertexCount;
-
 
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -223,6 +209,13 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 	
 }
 
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		bulletVector.add(kamera->getPos()+kamera->getKier()*0.5f, kamera->getKier());
+		//PlaySound("starwars.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	}
+}
+
 void error_callback(int error, const char* description) {
 	fputs(description, stderr);
 }
@@ -241,6 +234,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, mouseCallback);
+	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
 	std::vector< glm::vec4 > temp_vertices;     //wektory do w czytanych rzeczy
 	std::vector< glm::vec2 > temp_uvs;
@@ -251,6 +245,11 @@ void initOpenGLProgram(GLFWwindow* window) {
 	loadOBJ("square.obj", temp_vertices, temp_uvs, temp_normals);
 	podloga = new Floor(temp_vertices, temp_normals, temp_uvs, new FloorCollision(glm::vec3(-100, 0, -100), glm::vec3(100, 0, 100)));
 	//robal->SetPos(glm::vec3(0, 0, 7)); //polozenie robala
+	loadOBJ("kula.obj", temp_vertices, temp_uvs, temp_normals);
+	bulletVector.set(temp_vertices, temp_normals, temp_uvs);
+	loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);
+	enemyvector.set(temp_vertices, temp_normals, temp_uvs);
+	enemyvector.add(glm::vec3(1, 1, 1));
 	kamera->setRob(robal->PosPtr()); //kamera ma wskaźnik na pozycje robala
 	cout << "Stworzono" << endl;
 	glEnable(GL_BLEND);
@@ -320,23 +319,14 @@ void drawScene(GLFWwindow* window) {
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
 
-	glEnableVertexAttribArray(sp->a("vertex"));  //Włącz przesyłanie danych do atrybutu vertex
-	glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, vertices); //Wskaż tablicę z danymi dla atrybutu vertex
-	glEnableVertexAttribArray(sp->a("normal"));
-	glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, normals);
-	//glEnableVertexAttribArray(sp->a("color"));
-	glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, colors);
-
-
-	glDrawArrays(GL_TRIANGLES, 0, vertexCount); //Narysuj obiekt
-
-
 	//drawObject(cubeVertices, cubeNormals, cubeColors, vertexCount, glm::vec3(0, -1, 0), P, V, M, 50, 0.1, 50, 0);//narysowałem podłogę jak kox
 
 	//ladowanie kostki
 
 	robal->draw(sp, P, V);
 	podloga->draw(sp, P, V);
+	bulletVector.draw(sp, P, V);
+	enemyvector.draw(sp, P, V);
 
 	glDisableVertexAttribArray(sp->a("normal"));
 	glDisableVertexAttribArray(sp->a("vertex"));
@@ -383,6 +373,10 @@ int main()
 		kamera->setPos(kamera->getPos() + glm::vec3(kamera->getKier().x, 0, kamera->getKier().z) * speed_y * (float)glfwGetTime() + kamera->getPrawo() * speed_m * (float)glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
 		if (!kamera->getOnGround()) {
 			kamera->addForce(glm::vec3(0, -0.25, 0));
+		}
+		for (int i = 0; i < bulletVector.size(); i++) {
+			bulletVector[i]->move(glfwGetTime());
+			enemyvector.coll(bulletVector[i]->getPos());
 		}
 		kamera->applyForce(glfwGetTime());
 		podloga->colli(kamera);

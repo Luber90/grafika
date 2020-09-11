@@ -54,3 +54,65 @@ public:
 	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
 	void colli(Camera* c);
 };
+
+class Bullet : public Model {
+private:
+	glm::vec3 kier;
+public:
+	Bullet(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, glm::vec3 k, glm::vec3 p) : Model(vert, norm, uv) {
+		kier = k;
+		pos = p;
+	}
+	void move(float t);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+
+};
+
+class BulletVec {
+private:
+	std::vector<glm::vec4> vertices;
+	std::vector<glm::vec4> normals;
+	std::vector<glm::vec2> uvs;
+	std::vector<Bullet *> vector;
+public:
+	void add(glm::vec3 pos, glm::vec3 kier);
+	void set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
+	int size();
+	Bullet* operator[] (int i);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+};
+
+class Enemy : public Model {
+private:
+	EnemyCollision* coll;
+public:
+	Enemy(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, glm::vec3 p) : Model(vert, norm, uv){
+		pos = p;
+		coll = new EnemyCollision(pos + glm::vec3(-0.5, -0.5, -0.5), pos + glm::vec3(0.5, 0.5, 0.5));
+	}
+	bool colli(glm::vec3 p) {
+		return coll->collAct(p);
+	}
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+};
+
+class EnemyVector {
+private:
+	std::vector<glm::vec4> vertices;
+	std::vector<glm::vec4> normals;
+	std::vector<glm::vec2> uvs;
+	std::vector<Enemy*> vector;
+public:
+	void add(glm::vec3 pos);
+	void set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
+	int size();
+	Enemy* operator[] (int i);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	void coll(glm::vec3 p) {
+		for (int i = 0; i < vector.size(); i++) {
+			if (vector[i]->colli(p)) {
+				vector.clear();
+			}
+		}
+	}
+};
