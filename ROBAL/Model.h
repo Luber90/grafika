@@ -12,7 +12,7 @@ class Model {
 protected:
 	std::vector<glm::vec4> vertices;
 	std::vector<glm::vec4> normals;
-	std::vector<glm::vec2> uvs;
+	std::vector<glm::vec2> uvs; // wspolrzedne teksturowania ??chyba
 	glm::vec3 pos;
 public: 
 	Model(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv) {

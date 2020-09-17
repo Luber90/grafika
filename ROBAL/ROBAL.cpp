@@ -10,6 +10,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <vector>
 #include "snake.h"
 #include "shaderprogram.h"
 #include "camera.h"
@@ -116,6 +117,15 @@ ShaderProgram* sp;
 
 
 glm::vec3 cubePos(0, 0, 3);
+
+
+
+glm::vec3 obstacle1(0, 0, 15);
+
+std::vector<glm::vec3> obstaclePositions;//pozycje wszystkich przeszkód na ich podstawie kolizje
+
+
+
 
 
 
@@ -235,23 +245,32 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, mouseCallback);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
+
+	obstaclePositions.push_back(obstacle1);//dodawanie przeszkód do wektora
+
+
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
 	std::vector< glm::vec4 > temp_vertices;     //wektory do w czytanych rzeczy
 	std::vector< glm::vec2 > temp_uvs;
 	std::vector< glm::vec4 > temp_normals;
+
 	loadOBJ("cylindersmall.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
 	cout << "Załadowano" << endl;
 	robal = new Robal(temp_vertices, temp_normals, temp_uvs, kamera, glm::vec3(0, 0, 7), new RobalCollision); //tworzenie obiektu robaka z wektorami załądowanego modelu
+	
 	loadOBJ("square.obj", temp_vertices, temp_uvs, temp_normals);
 	podloga = new Floor(temp_vertices, temp_normals, temp_uvs, new FloorCollision(glm::vec3(-100, 0, -100), glm::vec3(100, 0, 100)));
 	//robal->SetPos(glm::vec3(0, 0, 7)); //polozenie robala
+	
 	loadOBJ("kula.obj", temp_vertices, temp_uvs, temp_normals);
 	bulletVector.set(temp_vertices, temp_normals, temp_uvs);
+	
 	loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);
 	enemyvector.set(temp_vertices, temp_normals, temp_uvs);
 	enemyvector.add(glm::vec3(1, 1, 1));
 	kamera->setRob(robal->PosPtr()); //kamera ma wskaźnik na pozycje robala
 	cout << "Stworzono" << endl;
+	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
