@@ -111,8 +111,54 @@ public:
 	void coll(glm::vec3 p) {
 		for (int i = 0; i < vector.size(); i++) {
 			if (vector[i]->colli(p)) {
-				vector.clear();
+				std::vector<Enemy*> tmpVector;
+				for (int j = 0; j < vector.size(); j++){
+					if (!(j == i)) {
+						tmpVector.push_back(vector[j]);
+					}
+					
+				}
+				vector = tmpVector;
 			}
 		}
 	}
 };
+class Obstacle : public Model { // "przeszkody" docelowo wydmy czy cos w tym rodzaju
+private:
+	ObstacleCollision* coll;
+public:
+	Obstacle(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, glm::vec3 p) : Model(vert, norm, uv) {
+		pos = p;
+		coll = new ObstacleCollision(pos + glm::vec3(-0.5, -0.5, -0.5), pos + glm::vec3(0.5, 0.5, 0.5));
+	}
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	glm::vec3 colli(glm::vec3 p) {
+		pos = coll->collAct(p);
+	}
+};
+
+class ObstacleVector {
+private:
+	std::vector<glm::vec4> vertices;
+	std::vector<glm::vec4> normals;
+	std::vector<glm::vec2> uvs;
+	std::vector<Obstacle*> vector;
+public:
+	void add(glm::vec3 pos);
+	void set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
+	int size();
+	Obstacle* operator[] (int i);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	void coll(glm::vec3 p) {
+		for (int i = 0; i < vector.size(); i++) {
+			vector[i]->colli(p);
+		}
+	}
+
+};
+
+
+
+
+
+

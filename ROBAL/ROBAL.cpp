@@ -21,6 +21,7 @@
 using namespace std;
 BulletVec bulletVector;
 EnemyVector enemyvector;
+ObstacleVector obstacleV;
 Camera* kamera = new Camera(glm::vec3(0, 1, 0));
 
 const float PI = 3.141592653589793f;
@@ -120,22 +121,15 @@ glm::vec3 cubePos(0, 0, 3);
 
 
 
-glm::vec3 obstacle1(0, 0, 15);
-
-std::vector<glm::vec3> obstaclePositions;//pozycje wszystkich przeszkód na ich podstawie kolizje
-
-
-
-
 
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
-		if (key == GLFW_KEY_A) {
+		if (key == GLFW_KEY_Q) {
 			speed_x = PI / 2;
 			robal->setAnimeAng(-10);
 		}
-		if (key == GLFW_KEY_D) {
+		if (key == GLFW_KEY_E) {
 			speed_x = -PI / 2;
 			robal->setAnimeAng(10);
 		}
@@ -148,8 +142,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			}
 		}
 		//if (key == GLFW_KEY_LEFT_SHIFT) speed_z = -PI / 2;
-		if (key == GLFW_KEY_Q) speed_m = PI / 2;
-		if (key == GLFW_KEY_E) speed_m = -PI / 2;
+		if (key == GLFW_KEY_A) speed_m = 15;
+		if (key == GLFW_KEY_D) speed_m = -15;
 		if (key == GLFW_KEY_F) {     //zmiana na bycie na robalu i na odwrot
 			if (robal->coll()) {
 				switch (kamera->getMode()) {
@@ -166,11 +160,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 	}
 	if (action == GLFW_RELEASE) {
-		if (key == GLFW_KEY_A) {
+		if (key == GLFW_KEY_Q) {
 			speed_x = 0;
 			robal->setAnimeAng(0);
 		}
-		if (key == GLFW_KEY_D) {
+		if (key == GLFW_KEY_E) {
 			speed_x = 0;
 			robal->setAnimeAng(0);
 		}
@@ -178,8 +172,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_S) speed_y = 0;
 		//if (key == GLFW_KEY_SPACE) speed_z = 0;
 		//if (key == GLFW_KEY_LEFT_SHIFT) speed_z = 0;
-		if (key == GLFW_KEY_Q) speed_m = 0;
-		if (key == GLFW_KEY_E) speed_m = 0;
+		if (key == GLFW_KEY_A) speed_m = 0;
+		if (key == GLFW_KEY_D) speed_m = 0;
 	}
 }
 
@@ -246,7 +240,6 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glfwSetCursorPosCallback(window, mouseCallback);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
-	obstaclePositions.push_back(obstacle1);//dodawanie przeszkód do wektora
 
 
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
@@ -268,9 +261,29 @@ void initOpenGLProgram(GLFWwindow* window) {
 	loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);
 	enemyvector.set(temp_vertices, temp_normals, temp_uvs);
 	enemyvector.add(glm::vec3(1, 1, 1));
+	enemyvector.add(glm::vec3(1, 1, 5));
+	enemyvector.add(glm::vec3(1, 1, 10));
+	enemyvector.add(glm::vec3(1, 1, 15));
+	enemyvector.add(glm::vec3(1, 1, 20));
+
+
+	obstacleV.set(temp_vertices, temp_normals, temp_uvs);
+	obstacleV.add(glm::vec3(10, 1, 10));
+	obstacleV.add(glm::vec3(10, 1, 15));
+	obstacleV.add(glm::vec3(10, 1, 20));
+	obstacleV.add(glm::vec3(10, 1, 25));
+	obstacleV.add(glm::vec3(10, 1, 30));
+
+
+
 	kamera->setRob(robal->PosPtr()); //kamera ma wskaźnik na pozycje robala
 	cout << "Stworzono" << endl;
 	
+	//glm::vec3 a;
+	//a = robal->getPos();
+	//cout << (a.x) << (a.y) << (a.z) << endl;
+
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -346,6 +359,7 @@ void drawScene(GLFWwindow* window) {
 	podloga->draw(sp, P, V);
 	bulletVector.draw(sp, P, V);
 	enemyvector.draw(sp, P, V);
+	obstacleV.draw(sp, P, V);
 
 	glDisableVertexAttribArray(sp->a("normal"));
 	glDisableVertexAttribArray(sp->a("vertex"));

@@ -47,3 +47,44 @@ public:
 		else return false;
 	}
 };
+
+class ObstacleCollision {
+public:
+	glm::vec3 leftdown, rightup;
+	ObstacleCollision(glm::vec3 a, glm::vec3 b) {
+		leftdown = a;
+		rightup = b;
+	}
+	glm::vec3 collAct(glm::vec3 pos) {
+		//glm::vec3 I = 0.5f*(rightup - leftdown);
+		//glm::vec3 V = pos - I;
+		int X, Y, Z;
+		if ((pos.x >= leftdown.x && pos.x <= rightup.x) && (pos.y >= leftdown.y && pos.y <= rightup.y) && (pos.z >= leftdown.z && pos.z <= rightup.z)) {
+			if (abs(pos.x - leftdown.x) <= abs(pos.x - leftdown.x)) {
+				X = leftdown.x - 0.5;
+			}
+			else
+			{
+				X = rightup.x + 0.5;
+			}
+			if (abs(pos.y - leftdown.y) <= abs(pos.y - leftdown.y)) {
+				Y = leftdown.y - 0.5;
+			}
+			else
+			{
+				Y= rightup.y + 0.5;
+			}
+			if (abs(pos.z - leftdown.z) <= abs(pos.z - leftdown.z)) {
+				Z = leftdown.z - 0.5;
+			}
+			else
+			{
+				Z = rightup.z + 0.5;
+			}
+			return glm::vec3(X, Y, Z);
+		}
+
+		else return pos;
+	}
+};
+
