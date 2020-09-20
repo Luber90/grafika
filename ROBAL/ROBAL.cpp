@@ -368,6 +368,8 @@ void drawScene(GLFWwindow* window) {
 
 }
 
+float deltat = 0;
+
 int main()
 {
 	GLFWwindow* window; //Wskaźnik na obiekt reprezentujący okno
@@ -402,20 +404,26 @@ int main()
 	glfwSetTime(0); //Zeruj timer
 	while (!glfwWindowShouldClose(window)) //Tak długo jak okno nie powinno zostać zamknięte
 	{
-		kamera->rotateKier(speed_x * glfwGetTime(), 0); //obraca kamere o  kat odpowiedni do speeda z inputu
-		kamera->setPos(kamera->getPos() + glm::vec3(kamera->getKier().x, 0, kamera->getKier().z) * speed_y * (float)glfwGetTime() + kamera->getPrawo() * speed_m * (float)glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
-		if (!kamera->getOnGround()) {
-			kamera->addForce(glm::vec3(0, -0.25, 0));
+		if (deltat >= 0.016666) {
+			kamera->rotateKier(speed_x * glfwGetTime(), 0); //obraca kamere o  kat odpowiedni do speeda z inputu
+			kamera->setPos(kamera->getPos() + glm::vec3(kamera->getKier().x, 0, kamera->getKier().z) * speed_y * (float)glfwGetTime() + kamera->getPrawo() * speed_m * (float)glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
+			if (!kamera->getOnGround()) {
+				kamera->addForce(glm::vec3(0, -0.25, 0));
+			}
+			for (int i = 0; i < bulletVector.size(); i++) {
+				bulletVector[i]->move(glfwGetTime());
+				enemyvector.coll(bulletVector[i]->getPos());
+			}
+			kamera->applyForce(glfwGetTime());
+			podloga->colli(kamera);
+			glfwSetTime(0); //Zeruj timer
+			drawScene(window); //Wykonaj procedurę rysującą
+			glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
+			deltat = 0;
 		}
-		for (int i = 0; i < bulletVector.size(); i++) {
-			bulletVector[i]->move(glfwGetTime());
-			enemyvector.coll(bulletVector[i]->getPos());
+		else {
+			deltat += glfwGetTime();
 		}
-		kamera->applyForce(glfwGetTime());
-		podloga->colli(kamera);
-		glfwSetTime(0); //Zeruj timer
-		drawScene(window); //Wykonaj procedurę rysującą
-		glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
 	}
 	
 	freeOpenGLProgram(window);
