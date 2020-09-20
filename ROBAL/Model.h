@@ -51,7 +51,7 @@ public:
 	~Floor() {
 		delete coll;
 	}
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
 	void colli(Camera* c);
 };
 
@@ -93,7 +93,7 @@ public:
 	bool colli(glm::vec3 p) {
 		return coll->collAct(p);
 	}
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
 };
 
 class EnemyVector {
@@ -107,7 +107,7 @@ public:
 	void set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
 	int size();
 	Enemy* operator[] (int i);
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
 	void coll(glm::vec3 p) {
 		for (int i = 0; i < vector.size(); i++) {
 			if (vector[i]->colli(p)) {

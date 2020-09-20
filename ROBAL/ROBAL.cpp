@@ -17,6 +17,7 @@
 #include "robalek.h"
 #include "Model.h""
 #include "Collisions.h"
+#include "lodepng.h"
 
 using namespace std;
 BulletVec bulletVector;
@@ -113,9 +114,11 @@ float aspectRatio = 1;
 Robal* robal;
 Floor* podloga;
 float* podloga_color;
-ShaderProgram* sp;
+ShaderProgram* sp,* sp1,* sp2;
 
 
+GLuint tex0; //Uchwyt – deklaracja globalna
+GLuint tex1; //Uchwyt – deklaracja globalna
 
 glm::vec3 cubePos(0, 0, 3);
 
@@ -137,7 +140,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_S) speed_y = -15;
 		if (key == GLFW_KEY_SPACE) { //speed_z = PI / 2;
 			if (kamera->getOnGround()) {
-				kamera->addForce(glm::vec3(0, 10, 0));
+				kamera->addForce(glm::vec3(0, 30, 0));
 				kamera->setOnGround(false);
 			}
 		}
@@ -220,6 +223,41 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	}
 }
 
+GLuint readTexture(const char* filename) {
+
+	GLuint tex;
+	glActiveTexture(GL_TEXTURE0);
+
+
+	//Wczytanie do pamięci komputera
+	std::vector<unsigned char> image; //Alokuj wektor do wczytania obrazka
+	unsigned width, height; //Zmienne do których wczytamy wymiary obrazka
+
+
+	//Wczytaj obrazek
+	unsigned error = lodepng::decode(image, width, height, filename);
+
+
+
+	//Import do pamięci karty graficznej
+	glGenTextures(1, &tex); //Zainicjuj jeden uchwyt
+	glBindTexture(GL_TEXTURE_2D, tex); //Uaktywnij uchwyt
+
+
+	//Wczytaj obrazek do pamięci KG skojarzonej z uchwytem
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, (unsigned char*)image.data());
+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	return tex;
+
+}
+
+
 void error_callback(int error, const char* description) {
 	fputs(description, stderr);
 }
@@ -243,9 +281,17 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
+	sp1 = new ShaderProgram("v_simplest1.glsl", NULL, "f_simplest1.glsl");
+	sp2 = new ShaderProgram("v_simplest2.glsl", NULL, "f_simplest2.glsl");
+
+
 	std::vector< glm::vec4 > temp_vertices;     //wektory do w czytanych rzeczy
 	std::vector< glm::vec2 > temp_uvs;
 	std::vector< glm::vec4 > temp_normals;
+
+
+	tex0 = readTexture("pustynia.png");// zaladowanie tekstury
+	tex1 = readTexture("obama.png");
 
 	loadOBJ("cylindersmall.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
 	cout << "Załadowano" << endl;
@@ -292,6 +338,8 @@ void freeOpenGLProgram(GLFWwindow* window) {
 	//************Tutaj umieszczaj kod, który należy wykonać po zakończeniu pętli głównej************
 
 	delete sp;
+	delete sp1;
+	delete sp2;
 	delete kamera;
 }
 
@@ -344,29 +392,42 @@ void drawScene(GLFWwindow* window) {
 	M = glm::translate(M, cubePos);
 
 
-	sp->use();//Aktywacja programu cieniującego
-	//Przeslij parametry programu cieniującego do karty graficznej
-	glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
-	glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
-	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+	//sp->use();//Aktywacja programu cieniującego
+	////Przeslij parametry programu cieniującego do karty graficznej
+	//glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
+	//glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
+	//glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
 
 	//drawObject(cubeVertices, cubeNormals, cubeColors, vertexCount, glm::vec3(0, -1, 0), P, V, M, 50, 0.1, 50, 0);//narysowałem podłogę jak kox
 
 	//ladowanie kostki
 
+	enemyvector.draw(sp1, P, V, tex1);
 	robal->draw(sp, P, V);
-	podloga->draw(sp, P, V);
+	podloga->draw(sp2, P, V, tex0);
 	bulletVector.draw(sp, P, V);
-	enemyvector.draw(sp, P, V);
 	obstacleV.draw(sp, P, V);
 
+	//glDisableVertexAttribArray(sp->a("texCoord0"));
 	glDisableVertexAttribArray(sp->a("normal"));
 	glDisableVertexAttribArray(sp->a("vertex"));
 	glDisableVertexAttribArray(sp->a("color"));
+
+	glDisableVertexAttribArray(sp1->a("texCoord0"));
+	glDisableVertexAttribArray(sp1->a("normal"));
+	glDisableVertexAttribArray(sp1->a("vertex"));
+	glDisableVertexAttribArray(sp1->a("color"));
+
+	glDisableVertexAttribArray(sp2->a("texCoord0"));
+	glDisableVertexAttribArray(sp2->a("normal"));
+	glDisableVertexAttribArray(sp2->a("vertex"));
+	glDisableVertexAttribArray(sp2->a("color"));
 	glfwSwapBuffers(window); //Przerzuć tylny bufor na przedni
 
 }
+
+float deltat = 0;
 
 int main()
 {
@@ -402,20 +463,26 @@ int main()
 	glfwSetTime(0); //Zeruj timer
 	while (!glfwWindowShouldClose(window)) //Tak długo jak okno nie powinno zostać zamknięte
 	{
-		kamera->rotateKier(speed_x * glfwGetTime(), 0); //obraca kamere o  kat odpowiedni do speeda z inputu
-		kamera->setPos(kamera->getPos() + glm::vec3(kamera->getKier().x, 0, kamera->getKier().z) * speed_y * (float)glfwGetTime() + kamera->getPrawo() * speed_m * (float)glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
-		if (!kamera->getOnGround()) {
-			kamera->addForce(glm::vec3(0, -0.25, 0));
+		if (deltat >= 0.016666) {
+			kamera->rotateKier(speed_x * glfwGetTime(), 0); //obraca kamere o  kat odpowiedni do speeda z inputu
+			kamera->setPos(kamera->getPos() + glm::vec3(kamera->getKier().x, 0, kamera->getKier().z) * speed_y * (float)glfwGetTime() + kamera->getPrawo() * speed_m * (float)glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
+			if (!kamera->getOnGround()) {
+				kamera->addForce(glm::vec3(0, -0.25, 0));
+			}
+			for (int i = 0; i < bulletVector.size(); i++) {
+				bulletVector[i]->move(glfwGetTime());
+				enemyvector.coll(bulletVector[i]->getPos());
+			}
+			kamera->applyForce(glfwGetTime());
+			podloga->colli(kamera);
+			glfwSetTime(0); //Zeruj timer
+			drawScene(window); //Wykonaj procedurę rysującą
+			glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
+			deltat = 0;
 		}
-		for (int i = 0; i < bulletVector.size(); i++) {
-			bulletVector[i]->move(glfwGetTime());
-			enemyvector.coll(bulletVector[i]->getPos());
+		else {
+			deltat += glfwGetTime();
 		}
-		kamera->applyForce(glfwGetTime());
-		podloga->colli(kamera);
-		glfwSetTime(0); //Zeruj timer
-		drawScene(window); //Wykonaj procedurę rysującą
-		glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
 	}
 	
 	freeOpenGLProgram(window);

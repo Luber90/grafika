@@ -1,3 +1,8 @@
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Model.h"
 
 
@@ -49,18 +54,33 @@ void Segment::draw2(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, glm::mat4 M, gl
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 }
 
-void Floor::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) {
+void Floor::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex) {
 	sp->use();
 	glm::mat4 M = glm::mat4(1.0f);
 	M = glm::scale(M, glm::vec3(100, 1, 100));
+
 	glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
 	glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+
+	glEnableVertexAttribArray(sp->a("texCoord0"));
+	glVertexAttribPointer(sp->a("texCoord0"), 2, GL_FLOAT, false, 0, &uvs[0]);
+
 	glEnableVertexAttribArray(sp->a("vertex"));
 	glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &vertices[0]);
 	glEnableVertexAttribArray(sp->a("normal"));
 	glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, &normals[0]);
+
+
+	glUniform1i(sp->u("textureMap0"), 0);
+
+	glActiveTexture(GL_TEXTURE0);
+
+	glBindTexture(GL_TEXTURE_2D, tex);
+
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
+	glDisableVertexAttribArray(sp->a("texCoord0"));
 }
 
 void Floor::colli(Camera* c) {
@@ -110,20 +130,37 @@ void BulletVec::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) {
 	}
 }
 
-void Enemy::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) {
+void Enemy::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex) {
 	sp->use();
 	glm::mat4 M = glm::mat4(1.0f);
-	M = glm::translate(M, pos);
+	M = glm::scale(M, glm::vec3(100, 1, 100));
+
 	glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
 	glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+
+	glEnableVertexAttribArray(sp->a("texCoord0"));
+	glVertexAttribPointer(sp->a("texCoord0"), 2, GL_FLOAT, false, 0, &uvs[0]);
+
 	glEnableVertexAttribArray(sp->a("vertex"));
 	glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, &vertices[0]);
+
 	glEnableVertexAttribArray(sp->a("normal"));
 	glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, &normals[0]);
-	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-}
 
+
+	glUniform1i(sp->u("textureMap0"), 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
+	glDisableVertexAttribArray(sp->a("texCoord0"));
+	glDisableVertexAttribArray(sp->a("normal"));
+	glDisableVertexAttribArray(sp->a("vertex"));
+	glDisableVertexAttribArray(sp->a("color"));
+}
 void EnemyVector::add(glm::vec3 pos) {
 	vector.push_back(new Enemy(vertices, normals, uvs, pos));
 }
@@ -142,9 +179,9 @@ void EnemyVector::set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, 
 	uvs = uv;
 }
 
-void EnemyVector::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) {
+void EnemyVector::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex) {
 	for (int i = 0; i < vector.size(); i++) {
-		vector[i]->draw(sp, P, V);
+		vector[i]->draw(sp, P, V, tex);
 	}
 }
 

@@ -13,7 +13,7 @@ Robal::Robal(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vect
 
 void Robal::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V) { //dopiero kiedy rysowanie jest tutaj to dziala
 	if (kameraMode == 1) {
-		pos = kamera->getPos() + glm::vec3(0, -1, 0);
+		pos = kamera->getPos() + glm::vec3(0, -1, 3);
 		glm::mat4 M = segment2->draw(sp, P, V, pos, kamera->getAng());
 		segment1->draw2(sp, P, V, M, glm::vec3(0, 0, 1), -animeang);
 		segment3->draw2(sp, P, V, M, glm::vec3(0, 0, -1), animeang);
