@@ -53,7 +53,7 @@ void Camera::changeMode() {
 	switch (mode) {
 	case 0:
 		mode = 1;
-		position = *robpos + glm::vec3(0, 0.75, 0);
+		position = *robpos + glm::vec3(0, 1.5, 0);
 		break;
 	case 1:
 		mode = 0;

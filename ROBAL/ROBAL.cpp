@@ -28,6 +28,10 @@ Camera* kamera = new Camera(glm::vec3(0, 1, 0));
 const float PI = 3.141592653589793f;
 
 
+float dist(glm::vec3 a, glm::vec3 b) {
+	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2) + pow(a.z - b.z, 2));
+}
+
 bool loadOBJ(const char* path, std::vector < glm::vec4 >& out_vertices, std::vector < glm::vec2 >& out_uvs, std::vector < glm::vec4 >& out_normals)
 {
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
@@ -114,11 +118,12 @@ float aspectRatio = 1;
 Robal* robal;
 Floor* podloga;
 float* podloga_color;
-ShaderProgram* sp,* sp1,* sp2;
+ShaderProgram* sp,* sp1,* sp2,* sprobal;
 
 
 GLuint tex0; //Uchwyt – deklaracja globalna
 GLuint tex1; //Uchwyt – deklaracja globalna
+GLuint tex2;
 
 glm::vec3 cubePos(0, 0, 3);
 
@@ -130,11 +135,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	if (action == GLFW_PRESS) {
 		if (key == GLFW_KEY_Q) {
 			speed_x = PI / 2;
-			robal->setAnimeAng(-10);
+			robal->setAnimeAng(-PI/30);
 		}
 		if (key == GLFW_KEY_E) {
 			speed_x = -PI / 2;
-			robal->setAnimeAng(10);
+			robal->setAnimeAng(PI / 30);
 		}
 		if (key == GLFW_KEY_W) speed_y = 15;
 		if (key == GLFW_KEY_S) speed_y = -15;
@@ -203,10 +208,10 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 	}
 	if (xoffset != 0) {
 		if (xoffset > 0) {
-			robal->setAnimeAng(-10);
+			robal->setAnimeAng(-PI / 30);
 		}
 		else {
-			robal->setAnimeAng(10);
+			robal->setAnimeAng(PI / 30);
 		}
 	}
 	else {
@@ -283,19 +288,25 @@ void initOpenGLProgram(GLFWwindow* window) {
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
 	sp1 = new ShaderProgram("v_simplest1.glsl", NULL, "f_simplest1.glsl");
 	sp2 = new ShaderProgram("v_simplest2.glsl", NULL, "f_simplest2.glsl");
+	sprobal = new ShaderProgram("v_robal.glsl", NULL, "f_robal.glsl");
 
 
 	std::vector< glm::vec4 > temp_vertices;     //wektory do w czytanych rzeczy
 	std::vector< glm::vec2 > temp_uvs;
 	std::vector< glm::vec4 > temp_normals;
+	std::vector< glm::vec4 > temp_vertices2;     
+	std::vector< glm::vec2 > temp_uvs2;
+	std::vector< glm::vec4 > temp_normals2;
 
 
 	tex0 = readTexture("pustynia.png");// zaladowanie tekstury
 	tex1 = readTexture("obama.png");
+	tex2 = readTexture("robal.png");
 
-	loadOBJ("cylindersmall.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
+	loadOBJ("tlow.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
+	loadOBJ("ogon.obj", temp_vertices2, temp_uvs2, temp_normals2);
 	cout << "Załadowano" << endl;
-	robal = new Robal(temp_vertices, temp_normals, temp_uvs, kamera, glm::vec3(0, 0, 7), new RobalCollision); //tworzenie obiektu robaka z wektorami załądowanego modelu
+	robal = new Robal(temp_vertices, temp_normals, temp_uvs, kamera, glm::vec3(0, 0, 7), new RobalCollision, temp_vertices2, temp_normals2, temp_uvs2); //tworzenie obiektu robaka z wektorami załądowanego modelu
 	
 	loadOBJ("square.obj", temp_vertices, temp_uvs, temp_normals);
 	podloga = new Floor(temp_vertices, temp_normals, temp_uvs, new FloorCollision(glm::vec3(-100, 0, -100), glm::vec3(100, 0, 100)));
@@ -304,15 +315,17 @@ void initOpenGLProgram(GLFWwindow* window) {
 	loadOBJ("kula.obj", temp_vertices, temp_uvs, temp_normals);
 	bulletVector.set(temp_vertices, temp_normals, temp_uvs);
 	
-	loadOBJ("cube.obj", temp_vertices, temp_uvs, temp_normals);
+	loadOBJ("enemybody.obj", temp_vertices, temp_uvs, temp_normals);
 	enemyvector.set(temp_vertices, temp_normals, temp_uvs);
-	enemyvector.add(glm::vec3(1, 1, 1));
-	enemyvector.add(glm::vec3(1, 1, 5));
-	enemyvector.add(glm::vec3(1, 1, 10));
-	enemyvector.add(glm::vec3(1, 1, 15));
-	enemyvector.add(glm::vec3(1, 1, 20));
+	loadOBJ("enemylufa.obj", temp_vertices, temp_uvs, temp_normals);
+	enemyvector.set2(temp_vertices, temp_normals, temp_uvs);
+	enemyvector.add(glm::vec3(2, 1, 2));
+	//enemyvector.add(glm::vec3(1, 1, 5));
+	//enemyvector.add(glm::vec3(1, 1, 10));
+	//enemyvector.add(glm::vec3(1, 1, 15));
+	//enemyvector.add(glm::vec3(1, 1, 20));
 
-
+	loadOBJ("square.obj", temp_vertices, temp_uvs, temp_normals);
 	obstacleV.set(temp_vertices, temp_normals, temp_uvs);
 	obstacleV.add(glm::vec3(10, 1, 10));
 	obstacleV.add(glm::vec3(10, 1, 15));
@@ -384,7 +397,7 @@ void drawScene(GLFWwindow* window) {
 
 	glm::mat4 V = glm::lookAt(
 		kamera->getPos(),
-		kamera->getPos() + kamera->getKier(),
+		kamera->getPos()+kamera->getKier(),
 		glm::vec3(0.0, 1.0, 0.0)); //Wylicz macierz widoku
 	glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatio, 0.01f, 50.0f); //Wylicz macierz rzutowania
 
@@ -404,7 +417,7 @@ void drawScene(GLFWwindow* window) {
 	//ladowanie kostki
 
 	enemyvector.draw(sp1, P, V, tex1);
-	robal->draw(sp, P, V);
+	robal->draw(sprobal, P, V, tex2); //coś się pierdoli chyba tutaj
 	podloga->draw(sp2, P, V, tex0);
 	bulletVector.draw(sp, P, V);
 	obstacleV.draw(sp, P, V);
@@ -463,6 +476,7 @@ int main()
 	glfwSetTime(0); //Zeruj timer
 	while (!glfwWindowShouldClose(window)) //Tak długo jak okno nie powinno zostać zamknięte
 	{
+		
 		if (deltat >= 0.016666) {
 			kamera->rotateKier(speed_x * glfwGetTime(), 0); //obraca kamere o  kat odpowiedni do speeda z inputu
 			kamera->setPos(kamera->getPos() + glm::vec3(kamera->getKier().x, 0, kamera->getKier().z) * speed_y * (float)glfwGetTime() + kamera->getPrawo() * speed_m * (float)glfwGetTime() + glm::vec3(0, speed_z * glfwGetTime(), 0)); //ustawia kamere zgodnie ze speedem
@@ -472,6 +486,9 @@ int main()
 			for (int i = 0; i < bulletVector.size(); i++) {
 				bulletVector[i]->move(glfwGetTime());
 				enemyvector.coll(bulletVector[i]->getPos());
+				if (bulletVector[i]->floorColl() || dist(kamera->getPos(), bulletVector[i]->getPos()) > 25) {
+					bulletVector.erase(i--);
+				}
 			}
 			kamera->applyForce(glfwGetTime());
 			podloga->colli(kamera);

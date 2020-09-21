@@ -37,8 +37,8 @@ public:
 	Segment(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv) : Model(vert, norm, uv) {
 
 	}
-	glm::mat4 draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, glm::vec3 pos, float ang);//noramlniue rysuje segment i zwraca macierz przekszta³ceñ
-	void draw2(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, glm::mat4 M, glm::vec3 przes, float ang);//rysuje zegment w oparciu o poprzedni narysowany, czly macierz M, wiêc ³¹twiej siê rysuje bez transformacji pojebanych jakichœ
+	glm::mat4 draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, glm::vec3 pos, float ang, GLuint tex);//noramlniue rysuje segment i zwraca macierz przekszta³ceñ
+	void draw2(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, glm::mat4 M, glm::vec3 przes, float ang, GLuint tex);//rysuje zegment w oparciu o poprzedni narysowany, czly macierz M, wiêc ³¹twiej siê rysuje bez transformacji pojebanych jakichœ
 };
 
 class Floor : public Model {
@@ -65,6 +65,7 @@ public:
 	}
 	void move(float t);
 	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	bool floorColl();
 
 };
 
@@ -80,15 +81,22 @@ public:
 	int size();
 	Bullet* operator[] (int i);
 	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	void erase(int i);
 };
 
 class Enemy : public Model {
 private:
 	EnemyCollision* coll;
+	std::vector<glm::vec4> vertices2;
+	std::vector<glm::vec4> normals2;
+	std::vector<glm::vec2> uvs2; 
 public:
-	Enemy(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, glm::vec3 p) : Model(vert, norm, uv){
+	Enemy(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, glm::vec3 p, std::vector<glm::vec4> vert2, std::vector<glm::vec4> norm2, std::vector<glm::vec2> uv2) : Model(vert, norm, uv){
 		pos = p;
 		coll = new EnemyCollision(pos + glm::vec3(-0.5, -0.5, -0.5), pos + glm::vec3(0.5, 0.5, 0.5));
+		vertices2 = vert2;
+		normals2 = norm2;
+		uvs2 = uv2;
 	}
 	bool colli(glm::vec3 p) {
 		return coll->collAct(p);
@@ -101,10 +109,14 @@ private:
 	std::vector<glm::vec4> vertices;
 	std::vector<glm::vec4> normals;
 	std::vector<glm::vec2> uvs;
+	std::vector<glm::vec4> vertices2;
+	std::vector<glm::vec4> normals2;
+	std::vector<glm::vec2> uvs2;
 	std::vector<Enemy*> vector;
 public:
 	void add(glm::vec3 pos);
 	void set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
+	void set2(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
 	int size();
 	Enemy* operator[] (int i);
 	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
