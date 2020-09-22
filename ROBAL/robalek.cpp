@@ -13,17 +13,17 @@ Robal::Robal(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vect
 	colli = rr;
 }
 
-void Robal::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex) { //dopiero kiedy rysowanie jest tutaj to dziala
+void Robal::draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, glm::vec3 lp1, glm::vec3 lp2) { //dopiero kiedy rysowanie jest tutaj to dziala
 	if (kameraMode == 1) {
 		pos = kamera->getPos() + glm::vec3(0, -1.5, 0);
-		glm::mat4 M = segment2->draw(sp, P, V, pos, kamera->getAng(), tex);
-		segment1->draw2(sp, P, V, M, glm::vec3(0.4, 0.22, -1.38), PI-animeang, tex);
-		segment3->draw2(sp, P, V, M, glm::vec3(0.4, 0.22, 0.1), animeang, tex);
+		glm::mat4 M = segment2->draw(sp, P, V, pos, kamera->getAng(), tex, glm::vec4(lp1, 1), glm::vec4(lp2, 1));
+		segment1->draw2(sp, P, V, M, glm::vec3(0.4, 0.22, -1.38), PI-animeang, tex, glm::vec4(lp1, 1), glm::vec4(lp2, 1));
+		segment3->draw2(sp, P, V, M, glm::vec3(0.4, 0.22, 0.1), animeang, tex, glm::vec4(lp1, 1), glm::vec4(lp2, 1));
 	}	
 	else {
-		glm::mat4 M = segment2->draw(sp, P, V, pos, 0, tex);
-		segment1->draw2(sp, P, V, M, glm::vec3(0.4, 0.22, -1.38), PI, tex);
-		segment3->draw2(sp, P, V, M, glm::vec3(0.4, 0.22, 0.1), 0, tex);
+		glm::mat4 M = segment2->draw(sp, P, V, pos, 0, tex, glm::vec4(lp1, 1), glm::vec4(lp2, 1));
+		segment1->draw2(sp, P, V, M, glm::vec3(0.4, 0.22, -1.38), PI, tex, glm::vec4(lp1, 1), glm::vec4(lp2, 1));
+		segment3->draw2(sp, P, V, M, glm::vec3(0.4, 0.22, 0.1), 0, tex, glm::vec4(lp1, 1), glm::vec4(lp2, 1));
 	}
 }
 

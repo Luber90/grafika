@@ -24,7 +24,7 @@ public:
 		delete segment2;
 		delete segment3;
 	}
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);  //dopiero kiedy rysowanie jest tutaj to dziala
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, glm::vec3 lp1, glm::vec3 lp2);  //dopiero kiedy rysowanie jest tutaj to dziala
 	void changeMode();
 	glm::vec3 getPos();
 	void SetPos(glm::vec3 v);

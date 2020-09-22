@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Pliki zasobów\NewFilter1">
-      <UniqueIdentifier>{3457b502-4406-4018-bf85-351990092f3d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pliki zasobów\NewFilter3">
-      <UniqueIdentifier>{e6a518f6-ea5a-4921-ac8f-0757a6155fc1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pliki zasobów\Enemy Shader">
       <UniqueIdentifier>{70ca7c91-00c9-4007-be2f-5af1c41969e3}</UniqueIdentifier>
     </Filter>
@@ -30,6 +24,9 @@
     </Filter>
     <Filter Include="Pliki zasobów\Obstacle Shader">
       <UniqueIdentifier>{611c5db8-d75d-4528-b9fe-4c790f54c6da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki zasobów\Lamp Shader">
+      <UniqueIdentifier>{b5b17a19-28e4-452c-bf50-a1266bdb4ebc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -82,18 +79,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="v_simplest.glsl">
-      <Filter>Pliki zasobów\NewFilter1</Filter>
-    </None>
-    <None Include="f_simplest.glsl">
-      <Filter>Pliki zasobów\NewFilter1</Filter>
-    </None>
-    <None Include="f_simplest2.glsl">
-      <Filter>Pliki zasobów\NewFilter3</Filter>
-    </None>
-    <None Include="v_simplest2.glsl">
-      <Filter>Pliki zasobów\NewFilter3</Filter>
-    </None>
     <None Include="f_robal.glsl">
       <Filter>Pliki zasobów\Robal Shader</Filter>
     </None>
@@ -117,6 +102,12 @@
     </None>
     <None Include="v_obstacle.glsl">
       <Filter>Pliki zasobów\Obstacle Shader</Filter>
+    </None>
+    <None Include="v_lamp.glsl">
+      <Filter>Pliki zasobów\Lamp Shader</Filter>
+    </None>
+    <None Include="f_lamp.glsl">
+      <Filter>Pliki zasobów\Lamp Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

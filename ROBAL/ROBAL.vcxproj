@@ -170,17 +170,15 @@
     <ClInclude Include="shaderprogram.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="f_lamp.glsl" />
     <None Include="f_obstacle.glsl" />
     <None Include="f_robal.glsl" />
-    <None Include="f_simplest.glsl" />
     <None Include="f_enemy.glsl" />
-    <None Include="f_simplest2.glsl" />
     <None Include="f_sky.glsl" />
+    <None Include="v_lamp.glsl" />
     <None Include="v_obstacle.glsl" />
     <None Include="v_robal.glsl" />
-    <None Include="v_simplest.glsl" />
     <None Include="v_enemy.glsl" />
-    <None Include="v_simplest2.glsl" />
     <None Include="v_sky.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -44,8 +44,8 @@ public:
 	Segment(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv) : Model(vert, norm, uv) {
 
 	}
-	glm::mat4 draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, glm::vec3 pos, float ang, GLuint tex);//noramlniue rysuje segment i zwraca macierz przekszta³ceñ
-	void draw2(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, glm::mat4 M, glm::vec3 przes, float ang, GLuint tex);//rysuje zegment w oparciu o poprzedni narysowany, czly macierz M, wiêc ³¹twiej siê rysuje bez transformacji pojebanych jakichœ
+	glm::mat4 draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, glm::vec3 pos, float ang, GLuint tex, glm::vec3 lp1, glm::vec3 lp2);//noramlniue rysuje segment i zwraca macierz przekszta³ceñ
+	void draw2(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, glm::mat4 M, glm::vec3 przes, float ang, GLuint tex, glm::vec3 lp1, glm::vec3 lp2);//rysuje zegment w oparciu o poprzedni narysowany, czly macierz M, wiêc ³¹twiej siê rysuje bez transformacji pojebanych jakichœ
 };
 
 class Floor : public Model {
@@ -58,7 +58,7 @@ public:
 	~Floor() {
 		delete coll;
 	}
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, glm::vec3 lp1, glm::vec3 lp2);
 	void colli(Camera* c);
 };
 
@@ -71,7 +71,7 @@ public:
 		pos = p;
 	}
 	void move(float t);
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, glm::vec4 lp1, glm::vec4 lp2);
 	bool floorColl();
 
 };
@@ -87,7 +87,7 @@ public:
 	void set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
 	int size();
 	Bullet* operator[] (int i);
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, glm::vec3 lp1, glm::vec3 lp2);
 	void erase(int i);
 };
 
@@ -108,7 +108,7 @@ public:
 	bool colli(glm::vec3 p) {
 		return coll->collAct(p);
 	}
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, GLuint tex2, glm::vec3 cmpos);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, GLuint tex2, glm::vec3 cmpos, glm::vec4 lp1, glm::vec4 lp2);
 };
 
 class EnemyVector {
@@ -126,7 +126,7 @@ public:
 	void set2(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
 	int size();
 	Enemy* operator[] (int i);
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, GLuint tex2, glm::vec3 cmpos);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, GLuint tex2, glm::vec3 cmpos, glm::vec3 lp1, glm::vec3 lp2);
 	void coll(glm::vec3 p) {
 		for (int i = 0; i < vector.size(); i++) {
 			if (vector[i]->colli(p)) {
@@ -142,6 +142,7 @@ public:
 		}
 	}
 };
+
 class Obstacle : public Model { // "przeszkody" docelowo wydmy czy cos w tym rodzaju
 private:
 	ObstacleCollision* coll;
@@ -152,7 +153,7 @@ public:
 		coll = new ObstacleCollision(pos + glm::vec3(-0.5, -0.5, -0.5), pos + glm::vec3(0.5, 0.5, 0.5), pos);
 		angle = ang;
 	}
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, glm::vec4 lp1, glm::vec4 lp2);
 	glm::vec3 colli(glm::vec3 p) {
 		return coll->collAct(p);
 		
@@ -170,13 +171,21 @@ public:
 	void set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
 	int size();
 	Obstacle* operator[] (int i);
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, glm::vec3 lp1, glm::vec3 lp2);
 	void coll(Camera* cam) {
 		for (int i = 0; i < vector.size(); i++) {
 			cam->setPos(vector[i]->colli(cam->getPos()));
 		}
 	}
 
+};
+
+class Lamp : public Model {
+public:
+	Lamp(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, glm::vec3 p) : Model(vert, norm, uv) {
+		pos = p;
+	}
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
 };
 
 

@@ -31,7 +31,7 @@ public:
 	bool collAct(Camera* c, glm::vec3 pos);
 };
 
-class BulletCollision {
+class BulletCollision { //kalsa relikt pozdro w chuj
 public:
 	bool collAct();
 };
@@ -61,40 +61,11 @@ public:
 		sr = s;
 	}
 	glm::vec3 collAct(glm::vec3 pos) {
-		//glm::vec3 I = 0.5f*(rightup - leftdown);
-		//glm::vec3 V = pos - I;
-		//int X, Y, Z;
-		//float cosik = 3.5;
-		if (dist(pos, sr) < 3) {
-			return pos + glm::normalize(pos - sr) * (3-dist(pos, sr) );
+		if (dist(pos, sr) < 4) {
+			return pos + glm::normalize(pos + glm::vec3(0, -0.5, 0) - sr) * (4 - dist(pos, sr));
 		}
 		else return pos;
-		/*if ((pos.x >= leftdown.x && pos.x <= rightup.x) && (pos.y >= leftdown.y && pos.y <= rightup.y) && (pos.z >= leftdown.z && pos.z <= rightup.z)) {
-			if (abs(pos.x - leftdown.x) <= abs(pos.x - rightup.x)) {
-				X = leftdown.x - cosik;
-			}
-			else
-			{
-				X = rightup.x + cosik;
-			}
-			if (abs(pos.y - leftdown.y) <= abs(pos.y - rightup.y)) {
-				Y = leftdown.y - cosik;
-			}
-			else
-			{
-				Y= rightup.y + cosik;
-			}
-			if (abs(pos.z - leftdown.z) <= abs(pos.z - rightup.z)) {
-				Z = leftdown.z - cosik;
-			}
-			else
-			{
-				Z = rightup.z + cosik;
-			}
-			return glm::vec3(X, Y, Z);
-		}
 
-		else return pos;*/
 	}
 };
 

@@ -25,7 +25,7 @@ EnemyVector enemyvector;
 ObstacleVector obstacleV;
 Camera* kamera = new Camera(glm::vec3(0, 1, 0));
 Sky* niebo;
-glm::vec3 lamp1(1, 2, 1), lamp2(0, 2, 5);
+Lamp* lamp1, *lamp2;
 
 const float PI = 3.141592653589793f;
 
@@ -118,7 +118,7 @@ float aspectRatio = 1;
 Robal* robal;
 Floor* podloga;
 float* podloga_color;
-ShaderProgram* sp,* spenemy,* sp2,* sprobal,* spniebo;
+ShaderProgram* sp,* spenemy,* sp2,* sprobal,* spniebo, *splamp;
 
 
 GLuint tex0; 
@@ -127,6 +127,8 @@ GLuint tex2;
 GLuint tex3;
 GLuint tex4;
 GLuint tex5;
+GLuint tex6;
+GLuint tex7;
 
 glm::vec3 cubePos(0, 0, 3);
 
@@ -146,16 +148,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 		if (key == GLFW_KEY_W) speed_y = 15;
 		if (key == GLFW_KEY_S) speed_y = -15;
-		if (key == GLFW_KEY_SPACE) { //speed_z = PI / 2;
+		if (key == GLFW_KEY_SPACE) { 
 			if (kamera->getOnGround()) {
-				kamera->addForce(glm::vec3(0, 30, 0));
+				kamera->addForce(glm::vec3(0, 5, 0));
 				kamera->setOnGround(false);
 			}
 		}
-		//if (key == GLFW_KEY_LEFT_SHIFT) speed_z = -PI / 2;
 		if (key == GLFW_KEY_A) speed_m = 15;
 		if (key == GLFW_KEY_D) speed_m = -15;
-		if (key == GLFW_KEY_F) {     //zmiana na bycie na robalu i na odwrot
+		if (key == GLFW_KEY_F) {     
 			if (robal->coll()) {
 				switch (kamera->getMode()) {
 				case 0:
@@ -181,8 +182,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 		if (key == GLFW_KEY_W) speed_y = 0;
 		if (key == GLFW_KEY_S) speed_y = 0;
-		//if (key == GLFW_KEY_SPACE) speed_z = 0;
-		//if (key == GLFW_KEY_LEFT_SHIFT) speed_z = 0;
 		if (key == GLFW_KEY_A) speed_m = 0;
 		if (key == GLFW_KEY_D) speed_m = 0;
 	}
@@ -277,7 +276,6 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 void initOpenGLProgram(GLFWwindow* window) {
-	//************Tutaj umieszczaj kod, który należy wykonać raz, na początku programu************
 	glClearColor(0, 0.35, 0.6, 1);
 	glEnable(GL_DEPTH_TEST);
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
@@ -289,13 +287,18 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 
 	sp = new ShaderProgram("v_obstacle.glsl", NULL, "f_obstacle.glsl");
+	cout << "sp" << endl;
 	spenemy = new ShaderProgram("v_enemy.glsl", NULL, "f_enemy.glsl");
-	sp2 = new ShaderProgram("v_simplest2.glsl", NULL, "f_simplest2.glsl");
+	cout << "spenemy" << endl;
 	sprobal = new ShaderProgram("v_robal.glsl", NULL, "f_robal.glsl");
+	cout << "sprobal" << endl;
 	spniebo = new ShaderProgram("v_sky.glsl", NULL, "f_sky.glsl");
+	cout << "spniebo" << endl;
+	splamp = new ShaderProgram("v_lamp.glsl", NULL, "f_lamp.glsl");
+	cout << "splamp" << endl;
 
 
-	std::vector< glm::vec4 > temp_vertices;     //wektory do w czytanych rzeczy
+	std::vector< glm::vec4 > temp_vertices;
 	std::vector< glm::vec2 > temp_uvs;
 	std::vector< glm::vec4 > temp_normals;
 	std::vector< glm::vec4 > temp_vertices2;     
@@ -303,28 +306,35 @@ void initOpenGLProgram(GLFWwindow* window) {
 	std::vector< glm::vec4 > temp_normals2;
 
 
-	tex0 = readTexture("pustynia.png");// zaladowanie tekstury
+	tex0 = readTexture("pustynia.png");
 	tex1 = readTexture("metal.png");
 	tex2 = readTexture("robal.png");
 	tex3 = readTexture("skyy.png");
 	tex4 = readTexture("skyyref.png");
 	tex5 = readTexture("wood.png");
+	tex6 = readTexture("light.png");
+	tex7 = readTexture("bullet.png");
 
-	loadOBJ("tlow.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
+	loadOBJ("tlow.obj", temp_vertices, temp_uvs, temp_normals); 
 	loadOBJ("ogon.obj", temp_vertices2, temp_uvs2, temp_normals2);
 	cout << "Załadowano" << endl;
-	robal = new Robal(temp_vertices, temp_normals, temp_uvs, kamera, glm::vec3(0, 0, 7), new RobalCollision, temp_vertices2, temp_normals2, temp_uvs2); //tworzenie obiektu robaka z wektorami załądowanego modelu
+	robal = new Robal(temp_vertices, temp_normals, temp_uvs, kamera, glm::vec3(0, 0, 7), new RobalCollision, temp_vertices2, temp_normals2, temp_uvs2);
 	
 	loadOBJ("square.obj", temp_vertices, temp_uvs, temp_normals);
 	podloga = new Floor(temp_vertices, temp_normals, temp_uvs, new FloorCollision(glm::vec3(-100, 0, -100), glm::vec3(100, 0, 100)));
-	//robal->SetPos(glm::vec3(0, 0, 7)); //polozenie robala
+
 	loadOBJ("kopula.obj", temp_vertices, temp_uvs, temp_normals);
 	niebo = new Sky(temp_vertices, temp_normals, temp_uvs);
 	loadOBJ("kula.obj", temp_vertices, temp_uvs, temp_normals);
 	bulletVector.set(temp_vertices, temp_normals, temp_uvs);
 	
 	loadOBJ("nowy.obj", temp_vertices, temp_uvs, temp_normals);
+
 	enemyvector.set(temp_vertices, temp_normals, temp_uvs);
+
+	lamp1 = new Lamp(temp_vertices, temp_normals, temp_uvs, glm::vec3(1, 20, 1));
+	lamp2 = new Lamp(temp_vertices, temp_normals, temp_uvs, glm::vec3(15, 5, 20));
+
 	loadOBJ("enemylufa.obj", temp_vertices, temp_uvs, temp_normals);
 	enemyvector.set2(temp_vertices, temp_normals, temp_uvs);
 	enemyvector.add(glm::vec3(-10, -0.4, 10));
@@ -343,12 +353,9 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 
 
-	kamera->setRob(robal->PosPtr()); //kamera ma wskaźnik na pozycje robala
+	kamera->setRob(robal->PosPtr());
 	cout << "Stworzono" << endl;
-	
-	//glm::vec3 a;
-	//a = robal->getPos();
-	//cout << (a.x) << (a.y) << (a.z) << endl;
+
 
 
 	glEnable(GL_BLEND);
@@ -356,8 +363,6 @@ void initOpenGLProgram(GLFWwindow* window) {
 }
 
 void freeOpenGLProgram(GLFWwindow* window) {
-	//************Tutaj umieszczaj kod, który należy wykonać po zakończeniu pętli głównej************
-
 	delete sp;
 	delete spenemy;
 	delete sp2;
@@ -365,73 +370,27 @@ void freeOpenGLProgram(GLFWwindow* window) {
 	delete kamera;
 }
 
-//funkcja do rysowania nowych obiektów
-void drawObject(float* vertices, float* normals, float* colors, int vertexCount, glm::vec3 position, glm::mat4 P, glm::mat4 V, glm::mat4 M, float scale_x, float scale_y, float scale_z, float rotate_y) {
-	M = glm::translate(M, position);
-	//M = glm::rotate(M, ang, glm::vec3(0, 1, 0));
-	M = glm::scale(M, glm::vec3(scale_x, scale_y, scale_z));
-
-	sp->use();
-
-	glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
-	glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
-	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
-
-	glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
-	glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
-	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
-
-
-	glEnableVertexAttribArray(sp->a("vertex"));
-	glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, vertices);
-
-	glEnableVertexAttribArray(sp->a("normal"));
-	glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, normals);
-
-	glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, colors);
-
-
-	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-
-	glDisableVertexAttribArray(sp->a("normal"));
-	glDisableVertexAttribArray(sp->a("vertex"));
-	glDisableVertexAttribArray(sp->a("color"));
-}
-
-
 void drawScene(GLFWwindow* window) {
-	//************Tutaj umieszczaj kod rysujący obraz******************l
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 	glm::mat4 V = glm::lookAt(
 		kamera->getPos(),
 		kamera->getPos()+kamera->getKier(),
-		glm::vec3(0.0, 1.0, 0.0)); //Wylicz macierz widoku
-	glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatio, 0.01f, 250.0f); //Wylicz macierz rzutowania
+		glm::vec3(0.0, 1.0, 0.0)); 
+	glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatio, 0.01f, 250.0f); 
 
 	glm::mat4 M = glm::mat4(1.0f);
 	M = glm::translate(M, cubePos);
 
-
-	//sp->use();//Aktywacja programu cieniującego
-	////Przeslij parametry programu cieniującego do karty graficznej
-	//glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
-	//glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
-	//glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
-
-
-	//drawObject(cubeVertices, cubeNormals, cubeColors, vertexCount, glm::vec3(0, -1, 0), P, V, M, 50, 0.1, 50, 0);//narysowałem podłogę jak kox
-
-	//ladowanie kostki
 	niebo->draw(spniebo, P, V, tex3);
-	enemyvector.draw(spenemy, P, V, tex1, tex4, kamera->getPos());
-	robal->draw(sprobal, P, V, tex2); //coś się pierdoli chyba tutaj
-	podloga->draw(sp2, P, V, tex0);
-	bulletVector.draw(sp2, P, V);
-	obstacleV.draw(sp, P, V, tex5);
-
-	//glDisableVertexAttribArray(sp->a("texCoord0"));
+	enemyvector.draw(spenemy, P, V, tex1, tex4, kamera->getPos(), lamp1->getPos(), lamp2->getPos());
+	robal->draw(sprobal, P, V, tex2, lamp1->getPos(), lamp2->getPos()); //coś się pierdoli chyba tutaj
+	podloga->draw(sp, P, V, tex0, lamp1->getPos(), lamp2->getPos());
+	bulletVector.draw(sp, P, V, tex7, lamp1->getPos(), lamp2->getPos());
+	obstacleV.draw(sp, P, V, tex5, lamp1->getPos(), lamp2->getPos());
+	lamp1->draw(splamp, P, V, tex6);
+	lamp2->draw(splamp, P, V, tex6);
 	glDisableVertexAttribArray(sp->a("normal"));
 	glDisableVertexAttribArray(sp->a("vertex"));
 	glDisableVertexAttribArray(sp->a("color"));
@@ -440,12 +399,7 @@ void drawScene(GLFWwindow* window) {
 	glDisableVertexAttribArray(spenemy->a("normal"));
 	glDisableVertexAttribArray(spenemy->a("vertex"));
 	glDisableVertexAttribArray(spenemy->a("color"));
-
-	glDisableVertexAttribArray(sp2->a("texCoord0"));
-	glDisableVertexAttribArray(sp2->a("normal"));
-	glDisableVertexAttribArray(sp2->a("vertex"));
-	glDisableVertexAttribArray(sp2->a("color"));
-	glfwSwapBuffers(window); //Przerzuć tylny bufor na przedni
+	glfwSwapBuffers(window);
 
 }
 
