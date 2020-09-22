@@ -28,6 +28,12 @@ public:
 	void SetPos(glm::vec3 v);
 };
 
+class Sky : public Model {
+public:
+	Sky(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv) :Model(vert, norm, uv) {}
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
+};
+
 //to bêd¹ segmenty robala, ¿eby mo¿na je by³o ³¹twiej animowaæ
 class Segment : public Model {
 private:
@@ -101,7 +107,7 @@ public:
 	bool colli(glm::vec3 p) {
 		return coll->collAct(p);
 	}
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, GLuint tex2, glm::vec3 cmpos);
 };
 
 class EnemyVector {
@@ -119,7 +125,7 @@ public:
 	void set2(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
 	int size();
 	Enemy* operator[] (int i);
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex, GLuint tex2, glm::vec3 cmpos);
 	void coll(glm::vec3 p) {
 		for (int i = 0; i < vector.size(); i++) {
 			if (vector[i]->colli(p)) {

@@ -25,6 +25,9 @@
     <Filter Include="Pliki zasobów\Robal Shader">
       <UniqueIdentifier>{60adbd06-d0a2-4a58-8a3c-9b87568bb935}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki zasobów\SkyShader">
+      <UniqueIdentifier>{f2af1238-0c15-4c0d-ad89-960133a7c949}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ROBAL.cpp">
@@ -82,12 +85,6 @@
     <None Include="f_simplest.glsl">
       <Filter>Pliki zasobów\NewFilter1</Filter>
     </None>
-    <None Include="f_simplest1.glsl">
-      <Filter>Pliki zasobów\Enemy Shader</Filter>
-    </None>
-    <None Include="v_simplest1.glsl">
-      <Filter>Pliki zasobów\Enemy Shader</Filter>
-    </None>
     <None Include="f_simplest2.glsl">
       <Filter>Pliki zasobów\NewFilter3</Filter>
     </None>
@@ -99,6 +96,18 @@
     </None>
     <None Include="v_robal.glsl">
       <Filter>Pliki zasobów\Robal Shader</Filter>
+    </None>
+    <None Include="f_sky.glsl">
+      <Filter>Pliki zasobów\SkyShader</Filter>
+    </None>
+    <None Include="v_sky.glsl">
+      <Filter>Pliki zasobów\SkyShader</Filter>
+    </None>
+    <None Include="f_enemy.glsl">
+      <Filter>Pliki zasobów\Enemy Shader</Filter>
+    </None>
+    <None Include="v_enemy.glsl">
+      <Filter>Pliki zasobów\Enemy Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

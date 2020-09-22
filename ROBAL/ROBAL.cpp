@@ -24,6 +24,7 @@ BulletVec bulletVector;
 EnemyVector enemyvector;
 ObstacleVector obstacleV;
 Camera* kamera = new Camera(glm::vec3(0, 1, 0));
+Sky* niebo;
 
 const float PI = 3.141592653589793f;
 
@@ -118,12 +119,14 @@ float aspectRatio = 1;
 Robal* robal;
 Floor* podloga;
 float* podloga_color;
-ShaderProgram* sp,* sp1,* sp2,* sprobal;
+ShaderProgram* sp,* spenemy,* sp2,* sprobal,* spniebo;
 
 
 GLuint tex0; //Uchwyt – deklaracja globalna
 GLuint tex1; //Uchwyt – deklaracja globalna
 GLuint tex2;
+GLuint tex3;
+GLuint tex4;
 
 glm::vec3 cubePos(0, 0, 3);
 
@@ -286,9 +289,10 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
-	sp1 = new ShaderProgram("v_simplest1.glsl", NULL, "f_simplest1.glsl");
+	spenemy = new ShaderProgram("v_enemy.glsl", NULL, "f_enemy.glsl");
 	sp2 = new ShaderProgram("v_simplest2.glsl", NULL, "f_simplest2.glsl");
 	sprobal = new ShaderProgram("v_robal.glsl", NULL, "f_robal.glsl");
+	spniebo = new ShaderProgram("v_sky.glsl", NULL, "f_sky.glsl");
 
 
 	std::vector< glm::vec4 > temp_vertices;     //wektory do w czytanych rzeczy
@@ -300,8 +304,10 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 
 	tex0 = readTexture("pustynia.png");// zaladowanie tekstury
-	tex1 = readTexture("obama.png");
+	tex1 = readTexture("metal.png");
 	tex2 = readTexture("robal.png");
+	tex3 = readTexture("skyy.png");
+	tex4 = readTexture("skyyref.png");
 
 	loadOBJ("tlow.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
 	loadOBJ("ogon.obj", temp_vertices2, temp_uvs2, temp_normals2);
@@ -311,15 +317,16 @@ void initOpenGLProgram(GLFWwindow* window) {
 	loadOBJ("square.obj", temp_vertices, temp_uvs, temp_normals);
 	podloga = new Floor(temp_vertices, temp_normals, temp_uvs, new FloorCollision(glm::vec3(-100, 0, -100), glm::vec3(100, 0, 100)));
 	//robal->SetPos(glm::vec3(0, 0, 7)); //polozenie robala
-	
+	loadOBJ("kopula.obj", temp_vertices, temp_uvs, temp_normals);
+	niebo = new Sky(temp_vertices, temp_normals, temp_uvs);
 	loadOBJ("kula.obj", temp_vertices, temp_uvs, temp_normals);
 	bulletVector.set(temp_vertices, temp_normals, temp_uvs);
 	
-	loadOBJ("enemybody.obj", temp_vertices, temp_uvs, temp_normals);
+	loadOBJ("nowy.obj", temp_vertices, temp_uvs, temp_normals);
 	enemyvector.set(temp_vertices, temp_normals, temp_uvs);
 	loadOBJ("enemylufa.obj", temp_vertices, temp_uvs, temp_normals);
 	enemyvector.set2(temp_vertices, temp_normals, temp_uvs);
-	enemyvector.add(glm::vec3(2, 1, 2));
+	enemyvector.add(glm::vec3(10, -0.4, 10));
 	//enemyvector.add(glm::vec3(1, 1, 5));
 	//enemyvector.add(glm::vec3(1, 1, 10));
 	//enemyvector.add(glm::vec3(1, 1, 15));
@@ -351,8 +358,9 @@ void freeOpenGLProgram(GLFWwindow* window) {
 	//************Tutaj umieszczaj kod, który należy wykonać po zakończeniu pętli głównej************
 
 	delete sp;
-	delete sp1;
+	delete spenemy;
 	delete sp2;
+	delete spniebo;
 	delete kamera;
 }
 
@@ -399,7 +407,7 @@ void drawScene(GLFWwindow* window) {
 		kamera->getPos(),
 		kamera->getPos()+kamera->getKier(),
 		glm::vec3(0.0, 1.0, 0.0)); //Wylicz macierz widoku
-	glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatio, 0.01f, 50.0f); //Wylicz macierz rzutowania
+	glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatio, 0.01f, 250.0f); //Wylicz macierz rzutowania
 
 	glm::mat4 M = glm::mat4(1.0f);
 	M = glm::translate(M, cubePos);
@@ -415,8 +423,9 @@ void drawScene(GLFWwindow* window) {
 	//drawObject(cubeVertices, cubeNormals, cubeColors, vertexCount, glm::vec3(0, -1, 0), P, V, M, 50, 0.1, 50, 0);//narysowałem podłogę jak kox
 
 	//ladowanie kostki
-
-	enemyvector.draw(sp1, P, V, tex1);
+	cout << "x: " << kamera->getKier().x << " z: " << kamera->getKier().z << endl;
+	niebo->draw(spniebo, P, V, tex3);
+	enemyvector.draw(spenemy, P, V, tex1, tex4, kamera->getPos());
 	robal->draw(sprobal, P, V, tex2); //coś się pierdoli chyba tutaj
 	podloga->draw(sp2, P, V, tex0);
 	bulletVector.draw(sp, P, V);
@@ -427,10 +436,10 @@ void drawScene(GLFWwindow* window) {
 	glDisableVertexAttribArray(sp->a("vertex"));
 	glDisableVertexAttribArray(sp->a("color"));
 
-	glDisableVertexAttribArray(sp1->a("texCoord0"));
-	glDisableVertexAttribArray(sp1->a("normal"));
-	glDisableVertexAttribArray(sp1->a("vertex"));
-	glDisableVertexAttribArray(sp1->a("color"));
+	glDisableVertexAttribArray(spenemy->a("texCoord0"));
+	glDisableVertexAttribArray(spenemy->a("normal"));
+	glDisableVertexAttribArray(spenemy->a("vertex"));
+	glDisableVertexAttribArray(spenemy->a("color"));
 
 	glDisableVertexAttribArray(sp2->a("texCoord0"));
 	glDisableVertexAttribArray(sp2->a("normal"));

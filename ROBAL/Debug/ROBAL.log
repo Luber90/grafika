@@ -1,8 +1,15 @@
-﻿  Collisions.cpp
+﻿  Model.cpp
 F:\grafika\ROBAL\ROBAL\Collisions.h(64,20): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
 F:\grafika\ROBAL\ROBAL\Collisions.h(68,19): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
 F:\grafika\ROBAL\ROBAL\Collisions.h(71,20): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
 F:\grafika\ROBAL\ROBAL\Collisions.h(75,18): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
 F:\grafika\ROBAL\ROBAL\Collisions.h(78,20): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
 F:\grafika\ROBAL\ROBAL\Collisions.h(82,19): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\Model.h(130,21): warning C4018: "<": niezgodność typu ze znakiem/bez znaku
+F:\grafika\ROBAL\ROBAL\Model.h(133,23): warning C4018: "<": niezgodność typu ze znakiem/bez znaku
+F:\grafika\ROBAL\ROBAL\Model.h(171,21): warning C4018: "<": niezgodność typu ze znakiem/bez znaku
+F:\grafika\ROBAL\ROBAL\Model.cpp(16,14): warning C4244: "return": konwersja z "double" do "float", możliwa utrata danych
+F:\grafika\ROBAL\ROBAL\Model.cpp(193,20): warning C4018: "<": niezgodność typu ze znakiem/bez znaku
+F:\grafika\ROBAL\ROBAL\Model.cpp(274,20): warning C4018: "<": niezgodność typu ze znakiem/bez znaku
+F:\grafika\ROBAL\ROBAL\Model.cpp(312,20): warning C4018: "<": niezgodność typu ze znakiem/bez znaku
   ROBAL.vcxproj -> F:\grafika\ROBAL\Debug\ROBAL.exe
