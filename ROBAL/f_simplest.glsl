@@ -25,6 +25,6 @@ void main(void) {
 	float nl = clamp(dot(mn, ml), 0, 1);
 	float rv = pow(clamp(dot(mr, mv), 0, 1), 50);
 	pixelColor = vec4(ic.rgb * 0.3, 0) + vec4(kd.rgb * nl, kd.a) + vec4(ks.rgb * rv, 0);
-	/*pixelColor = ic;*/
+	//pixelColor = ic;
 	
 }

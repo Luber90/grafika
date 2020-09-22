@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "shaderprogram.h"
 #include "Collisions.h"
+#include "camera.h"
 
 //klasa modelu, uzywa jej robal, robal mial byc tutaj ale sie bugowalo jak camera.h zawierala model.h i odwrotnie i naraz chcialy z siebie obiekty to robal.h dziedziczy stad
 
@@ -99,7 +100,7 @@ private:
 public:
 	Enemy(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, glm::vec3 p, std::vector<glm::vec4> vert2, std::vector<glm::vec4> norm2, std::vector<glm::vec2> uv2) : Model(vert, norm, uv){
 		pos = p;
-		coll = new EnemyCollision(pos + glm::vec3(-0.5, -0.5, -0.5), pos + glm::vec3(0.5, 0.5, 0.5));
+		coll = new EnemyCollision(pos);
 		vertices2 = vert2;
 		normals2 = norm2;
 		uvs2 = uv2;
@@ -144,14 +145,17 @@ public:
 class Obstacle : public Model { // "przeszkody" docelowo wydmy czy cos w tym rodzaju
 private:
 	ObstacleCollision* coll;
+	float angle;
 public:
-	Obstacle(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, glm::vec3 p) : Model(vert, norm, uv) {
+	Obstacle(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv, glm::vec3 p, float ang) : Model(vert, norm, uv) {
 		pos = p;
-		coll = new ObstacleCollision(pos + glm::vec3(-0.5, -0.5, -0.5), pos + glm::vec3(0.5, 0.5, 0.5));
+		coll = new ObstacleCollision(pos + glm::vec3(-0.5, -0.5, -0.5), pos + glm::vec3(0.5, 0.5, 0.5), pos);
+		angle = ang;
 	}
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
 	glm::vec3 colli(glm::vec3 p) {
-		pos = coll->collAct(p);
+		return coll->collAct(p);
+		
 	}
 };
 
@@ -162,14 +166,14 @@ private:
 	std::vector<glm::vec2> uvs;
 	std::vector<Obstacle*> vector;
 public:
-	void add(glm::vec3 pos);
+	void add(glm::vec3 pos, float ang);
 	void set(std::vector<glm::vec4> vert, std::vector<glm::vec4> norm, std::vector<glm::vec2> uv);
 	int size();
 	Obstacle* operator[] (int i);
-	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V);
-	void coll(glm::vec3 p) {
+	void draw(ShaderProgram* sp, glm::mat4 P, glm::mat4 V, GLuint tex);
+	void coll(Camera* cam) {
 		for (int i = 0; i < vector.size(); i++) {
-			vector[i]->colli(p);
+			cam->setPos(vector[i]->colli(cam->getPos()));
 		}
 	}
 

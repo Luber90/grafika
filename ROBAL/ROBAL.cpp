@@ -25,13 +25,12 @@ EnemyVector enemyvector;
 ObstacleVector obstacleV;
 Camera* kamera = new Camera(glm::vec3(0, 1, 0));
 Sky* niebo;
+glm::vec3 lamp1(1, 2, 1), lamp2(0, 2, 5);
 
 const float PI = 3.141592653589793f;
 
 
-float dist(glm::vec3 a, glm::vec3 b) {
-	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2) + pow(a.z - b.z, 2));
-}
+
 
 bool loadOBJ(const char* path, std::vector < glm::vec4 >& out_vertices, std::vector < glm::vec2 >& out_uvs, std::vector < glm::vec4 >& out_normals)
 {
@@ -122,11 +121,12 @@ float* podloga_color;
 ShaderProgram* sp,* spenemy,* sp2,* sprobal,* spniebo;
 
 
-GLuint tex0; //Uchwyt – deklaracja globalna
-GLuint tex1; //Uchwyt – deklaracja globalna
+GLuint tex0; 
+GLuint tex1; 
 GLuint tex2;
 GLuint tex3;
 GLuint tex4;
+GLuint tex5;
 
 glm::vec3 cubePos(0, 0, 3);
 
@@ -288,7 +288,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 
 
-	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
+	sp = new ShaderProgram("v_obstacle.glsl", NULL, "f_obstacle.glsl");
 	spenemy = new ShaderProgram("v_enemy.glsl", NULL, "f_enemy.glsl");
 	sp2 = new ShaderProgram("v_simplest2.glsl", NULL, "f_simplest2.glsl");
 	sprobal = new ShaderProgram("v_robal.glsl", NULL, "f_robal.glsl");
@@ -308,6 +308,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	tex2 = readTexture("robal.png");
 	tex3 = readTexture("skyy.png");
 	tex4 = readTexture("skyyref.png");
+	tex5 = readTexture("wood.png");
 
 	loadOBJ("tlow.obj", temp_vertices, temp_uvs, temp_normals);  //ładowanie kostki
 	loadOBJ("ogon.obj", temp_vertices2, temp_uvs2, temp_normals2);
@@ -326,19 +327,19 @@ void initOpenGLProgram(GLFWwindow* window) {
 	enemyvector.set(temp_vertices, temp_normals, temp_uvs);
 	loadOBJ("enemylufa.obj", temp_vertices, temp_uvs, temp_normals);
 	enemyvector.set2(temp_vertices, temp_normals, temp_uvs);
-	enemyvector.add(glm::vec3(10, -0.4, 10));
-	//enemyvector.add(glm::vec3(1, 1, 5));
-	//enemyvector.add(glm::vec3(1, 1, 10));
-	//enemyvector.add(glm::vec3(1, 1, 15));
-	//enemyvector.add(glm::vec3(1, 1, 20));
+	enemyvector.add(glm::vec3(-10, -0.4, 10));
+	enemyvector.add(glm::vec3(1, -0.4, 5));
+	enemyvector.add(glm::vec3(1, -0.4, 10));
+	enemyvector.add(glm::vec3(1, -0.4, 15));
+	//enemyvector.add(glm::vec3(1, -0.4, 20));
 
-	loadOBJ("square.obj", temp_vertices, temp_uvs, temp_normals);
+	loadOBJ("fence.obj", temp_vertices, temp_uvs, temp_normals);
 	obstacleV.set(temp_vertices, temp_normals, temp_uvs);
-	obstacleV.add(glm::vec3(10, 1, 10));
-	obstacleV.add(glm::vec3(10, 1, 15));
-	obstacleV.add(glm::vec3(10, 1, 20));
-	obstacleV.add(glm::vec3(10, 1, 25));
-	obstacleV.add(glm::vec3(10, 1, 30));
+	obstacleV.add(glm::vec3(10, 1, 10), 0);
+	obstacleV.add(glm::vec3(10, 1, 15), PI/2);
+	obstacleV.add(glm::vec3(10, 1, 20), PI/2);
+	obstacleV.add(glm::vec3(10, 1, 25), 0);
+	obstacleV.add(glm::vec3(10, 1, 30), 0);
 
 
 
@@ -423,13 +424,12 @@ void drawScene(GLFWwindow* window) {
 	//drawObject(cubeVertices, cubeNormals, cubeColors, vertexCount, glm::vec3(0, -1, 0), P, V, M, 50, 0.1, 50, 0);//narysowałem podłogę jak kox
 
 	//ladowanie kostki
-	cout << "x: " << kamera->getKier().x << " z: " << kamera->getKier().z << endl;
 	niebo->draw(spniebo, P, V, tex3);
 	enemyvector.draw(spenemy, P, V, tex1, tex4, kamera->getPos());
 	robal->draw(sprobal, P, V, tex2); //coś się pierdoli chyba tutaj
 	podloga->draw(sp2, P, V, tex0);
-	bulletVector.draw(sp, P, V);
-	obstacleV.draw(sp, P, V);
+	bulletVector.draw(sp2, P, V);
+	obstacleV.draw(sp, P, V, tex5);
 
 	//glDisableVertexAttribArray(sp->a("texCoord0"));
 	glDisableVertexAttribArray(sp->a("normal"));
@@ -501,6 +501,7 @@ int main()
 			}
 			kamera->applyForce(glfwGetTime());
 			podloga->colli(kamera);
+			obstacleV.coll(kamera);
 			glfwSetTime(0); //Zeruj timer
 			drawScene(window); //Wykonaj procedurę rysującą
 			glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.

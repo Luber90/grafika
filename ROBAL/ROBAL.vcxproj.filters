@@ -28,6 +28,9 @@
     <Filter Include="Pliki zasobów\SkyShader">
       <UniqueIdentifier>{f2af1238-0c15-4c0d-ad89-960133a7c949}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki zasobów\Obstacle Shader">
+      <UniqueIdentifier>{611c5db8-d75d-4528-b9fe-4c790f54c6da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ROBAL.cpp">
@@ -108,6 +111,12 @@
     </None>
     <None Include="v_enemy.glsl">
       <Filter>Pliki zasobów\Enemy Shader</Filter>
+    </None>
+    <None Include="f_obstacle.glsl">
+      <Filter>Pliki zasobów\Obstacle Shader</Filter>
+    </None>
+    <None Include="v_obstacle.glsl">
+      <Filter>Pliki zasobów\Obstacle Shader</Filter>
     </None>
   </ItemGroup>
 </Project>
