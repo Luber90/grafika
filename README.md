@@ -1,6 +1,3 @@
 # grafika
 
-Robal
-
-
-Bottom Text
+OpenGL riding on worm demo
